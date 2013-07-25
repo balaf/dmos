@@ -1,4 +1,6 @@
-nconf = require('nconf');
+'use strict';
+
+var nconf = require('nconf');
 
 //
 // Setup nconf to use (in-order):
@@ -15,11 +17,15 @@ nconf.file({ file: __dirname + '../conf/dmos.conf' });
 // The default values are overwritten by the configuraiton file
 
 nconf.defaults({
+    simulation: {
+        "users": 10,
+        "duration": 2
+    },
     logging: {
         "loglevels": {
-            "default":"ALL",
-            "console":"ALL",
-            "wpi":"ALL"
+            "default": "ALL",
+            "console": "ALL",
+            "wpi":" ALL"
         },
         logappenders:{
            "appenders": [
@@ -50,7 +56,8 @@ nconf.defaults({
 
 var conf = {
     levels : nconf.get("logging:loglevels"),
-    appenders : nconf.get("logging:logappenders")
+    appenders : nconf.get("logging:logappenders"),
+    simulation : nconf.get("simulation")
 }
 
 module.exports = conf;
