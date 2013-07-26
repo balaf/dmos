@@ -7,7 +7,7 @@ var stats = {
     minDuration : 0,
     maxDuration : 5000000000,
     meanDuration : 0,
-    lastStarted : 0,
+    lastStarted : 1,
     lastFinished : 0,
     firstStarted : 0,
     firstFinished : 0,
@@ -19,13 +19,14 @@ var stats = {
 };
 
 function printResults(targetArrivalRate, targetUsers){
-    console.log('---- End of Simulation -----');
+    console.log('-------------')
     console.log('Duration: %dsec = %dmin = %dhr', getDurationSec(stats),getDurationMin(stats),getDurationHr(stats));
     console.log('Target Arrival Rate (req/sec):', targetArrivalRate);
     console.log('Achieved Arrival Rate (req/sec):', getArrivalRate(stats));
     console.log('Target logged-on users:', targetUsers);
     console.log('Started:', stats.started);
     console.log('Finished:', stats.finished);
+    console.log('\n\n');
 }
 
 function roundTo2Decimals(numberToRound) {
@@ -51,7 +52,7 @@ function getDurationHr(stats) {
 }
 
 function getArrivalRate(stats) {
-    return (stats.started-1) / (stats.lastStarted - stats.firstStarted) * 1000;
+    return stats.started / ((stats.lastStarted - stats.firstStarted)/1000);
 }
 
 function setMin(time) {

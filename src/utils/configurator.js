@@ -19,7 +19,10 @@ nconf.file({ file: __dirname + '../conf/dmos.conf' });
 nconf.defaults({
     simulation: {
         "users": 10,
-        "duration": 2
+        "duration": 2,
+        "mac" : "03:00:00:00:00:00",
+        "be164" : 30210800000,
+        "e164" : 4021080000
     },
     logging: {
         "loglevels": {
@@ -46,7 +49,7 @@ nconf.defaults({
                     "category": "wpi"
                 },
                 {
-                    "type": "console",
+                    "type": "file",
                     "absolute": true,
                     "filename": "../log/fsm.log",
                     "maxLogSize": 200000,

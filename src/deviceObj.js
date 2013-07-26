@@ -15,6 +15,10 @@ function deviceObject (mac, e164, be164) {
     this.state = "idle";
     this.cookie = '';
     this.mobilityState = '1'; // logoff
+    this.finished = false;
+    this.duration = 0;
+    this.startTime = 0;
+    this.endTime = 0;
 
     init(this);
 };
