@@ -41,6 +41,14 @@ nconf.defaults({
                 },
                 {
                     "type": "console",
+                    "absolute": true,
+                    "filename": "../log/fsm.log",
+                    "maxLogSize": 200000,
+                    "backups": 5,
+                    "category": "fsm"
+                },
+                {
+                    "type": "console",
                     "category":"console"
                 }
             ]
