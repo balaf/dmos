@@ -1,4 +1,3 @@
-#!/usr/bin/env nodejs
 'use strict';
 
 // define global vaiable for logging
