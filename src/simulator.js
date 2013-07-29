@@ -19,8 +19,6 @@ var simConfig = {
     targetRate: 6 //(users/sec)
 };
 
-var simTime = {};
-
 var simStatus = {
     status : "finished"
 }
@@ -41,12 +39,12 @@ module.exports.start = function(config){
     var devices = initializeDevices(simConfig.users, baseValues);
 
     console.log("Started with SimConfig:", JSON.stringify(simConfig));
-    simTime.startTime = new Date();
+    simStats.startTime = new Date();
 
     var interval = setInterval(startOne, 1000 / simConfig.targetRate);
 
     function startOne(){
-        simTime.lastStarted = new Date();
+        simStats.lastStarted = new Date();
 
         var currentDevice = devices[simStats.started];
         ///// Update Statistics for each new logon
@@ -131,12 +129,8 @@ module.exports.stop = function(interval){
     simStatus.status = "finished";
 };
 
-
-module.exports.getTime = function () {
-    return simTime;
-};
-
 module.exports.getStats = function () {
+    simStats.now = new Date();
     return simStats;
 };
 

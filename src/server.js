@@ -32,9 +32,7 @@ wss.on('connection', function(ws) {
         }
         if (JSONmessage.action === "start"){
             simulationID = simulator.start(JSONmessage.config);
-            updateInterval = setInterval(function(){
-                ws.send(JSON.stringify(simulator.getTime()));
-            },2000);
+            updateInterval = setInterval(sendStats, 2000, ws);
         }
         if (JSONmessage.action === "stop"){
             simulator.stop(simulationID);
@@ -43,3 +41,12 @@ wss.on('connection', function(ws) {
 
     });
 });
+
+function sendStats(ws){
+    var results = {
+        status : simulator.getStatus(),
+        stats : simulator.getStats(),
+        config : simulator.getConfig()
+    };
+    ws.send(JSON.stringify(results));
+}
