@@ -5,46 +5,59 @@
             <title>OpenScape DLS - Simulator</title>
             <link rel="stylesheet" href="css/bootstrap.min.css">
             <link rel="stylesheet" href="css/style.css">
-
-
-
         </head>
         <body>
             <div class="container">
                 <div class="page-header">
                     <h1 id="overview">OpenScape DLS Simulator</h1>
+                    <a href="#modal" id="conf" class="btn btn-info pull-right">Configuration</a>
                 </div>
                 <div class="row">
-                    <div class="col-2 col-lg-2">
-                        <h5>Actual Arrival Rate:   <span class="rate">5.98</span> </h5>
-                        <div class="gauge" data-bind="dxCircularGauge: true" data-dx_circular_gauge=" gaugeRequestsNumberOptions"></div>
+                    <div class="col-4 col-lg-4">
+                        <h5 class="center">Actual Arrival Rate:   <span class="rate" data-bind="text: actualArrivalRate"></span> </h5>
+                        <div class="gauge" data-bind="dxCircularGauge: { needles : actualArrivalRate}"></div>
                         <div class="text">View the actual number of requests per second sent that the simulator manages to send</div>
 
                     </div>
-                    <div class="col-2 col-lg-2">
-                        <h5>Target Arrival Rate:  <span class="rate">6</span> </h5>
-                        <div class="gauge" data-bind="dxCircularGauge: true" data-dx_circular_gauge=" gaugeRequestsNumberOptions"></div>
+                    <div class="col-4 col-lg-4">
+                        <h5 class="center">Target Arrival Rate:  <span class="rate" data-bind="text: targetArrivalRate"></span> </h5>
+                        <div class="gauge" data-bind="dxCircularGauge: { title : targetArrivalRate}"></div>
                         <div class="text">View the target request arrival rate as set in the simulation configuraiton at the start of the simulation</div>
                     </div>
-                    <div class="col-2 col-lg-2">
-                        <h5>Actual Completion Rate:  <span class="rate">8</span></h5>
-                        <div class="gauge" data-bind="dxCircularGauge: true" data-dx_circular_gauge=" gaugeRequestsNumberOptions"></div>
+                    <div class="col-4 col-lg-4">
+                        <h5 class="center">Actual Completion Rate:  <span class="rate" data-bind="text: actualFinishRate"></span></h5>
+                        <div class="gauge" data-bind="dxCircularGauge: { title : actualFinishRate}"></div>
                         <div class="text">View the request completion rate acheived by DLS</div>
-
-
-
                     </div>
                 </div>
 
-                <div id="progressBar" style="height: 100px; width: 100%; margin-bottom: 10px;"></div>
+                <div id="status">
+                    <div id="progressBar" data-bind="attr: { style: barWidth }"></div>
+                    <div id="statusText">Status: <span class="simStatus" data-bind="text: progressDisplay"></span></div>
+
+
+                </div>
                 <p>
                     <button type="button" id="start" class="btn btn-success btn-large master">Start!</button>
                     <button type="button" id="stop" class="btn btn-danger btn-large slave pull-right">Stop!</button>
                 </p>
 
+
             </div>
 
+             <aside id="modal">
+                    <header>
+                          <h2>Configuraiton</h2>
+                    </header>
+                    <section>
+                        Form goes here
+                    </section>
+                    <footer>
+                        <a href="#" id="cancelBt" class="btn btn-default pull-right">Cancel</a>
+                        <a href="#" id="saveBt" class="btn btn-success pull-left">Save</a>
+                    </footer>
 
+             </aside>
         </body>
         <script src="js/jquery-2.0.3.min.js"></script>
         <script src="js/bootstrap.min.js"></script>

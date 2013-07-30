@@ -7,26 +7,26 @@ var simConfig = {
     be164 : 30210800000,
     e164 : 4021080000,
     action: 'logon',
-    users: 10,
+    users: 100,
     targetRate: 6 //(users/sec)
 };
 
-var simStats = {}
-var simActualConfig = {}
+var simStats = {};
+var simActualConfig = {};
 var simStatus = {
-    status : "finished"
-}
+    status : "unknown"
+};
 
 var actualArrivalRate;
 var actualFinishRate;
-var estimatedDuraiton;
+var estimatedDuration;
 var currentDuration;
-var remainingTime;
-var remainingPercentage;
+var progress;
 
 // When the connection is open, send some data to the server
 connection.onopen = function () {
     connection.send('Ping'); // Send the message 'Ping' to the server
+
 };
 
 // Log errors
@@ -36,6 +36,7 @@ connection.onerror = function (error) {
 
 // Log messages from the server
 connection.onmessage = function (e) {
+
     console.log( e.data);
     var jsonData;
     try {
@@ -44,9 +45,32 @@ connection.onmessage = function (e) {
         console.log(err);
     }
     simStatus = jsonData.status;
+
+    // Update DOM on connection
+    App.targetArrivalRate(simActualConfig.targetRate);
+    App.targetUsers(simActualConfig.users);
+
+    // update buttons based on status
+    if (simStatus.status === "finished") {
+        $('#stop').attr('disabled', 'disabled');
+        $('#start').removeAttr('disabled');
+        $('#saveBt').removeAttr('disabled');
+
+    } else {
+        $('#stop').removeAttr('disabled');
+        $('#saveBt').attr('disabled', 'disabled');
+        $('#start').attr('disabled', 'disabled');
+    }
+
+    //// configuration pop-up buttons
+    $('#save').click(function(){
+        console.log("Saving form");
+    });
+
     if (jsonData.stats) {
         simStats = jsonData.stats;
         /// fix simStats ///
+        simStats.startTime = new Date(jsonData.stats.startTime);
         simStats.lastStarted = new Date(jsonData.stats.lastStarted);
         simStats.lastFinished = new Date(jsonData.stats.lastFinished);
         simStats.firstStarted = new Date(jsonData.stats.firstStarted);
@@ -57,21 +81,123 @@ connection.onmessage = function (e) {
         console.log(simStats);
         console.log(simActualConfig);
 
+        /// edge cases:
+        /// 1. none or only one has yet started
+        actualArrivalRate = 0;
+        actualFinishRate = 0;
+        estimatedDuration = 0;
+        currentDuration = 0;
+        progress = 0;
+
+        /// 1. none or only one has yet finished
+        if (simStats.finished <=1) {
+            actualArrivalRate = simStats.started * 1000 / (simStats.lastStarted - simStats.firstStarted);
+        }
+        else if ((simStats.started > 1) && (simStats.finished > 1)) {
+            actualArrivalRate = simStats.started * 1000 / (simStats.lastStarted - simStats.firstStarted);
+            actualFinishRate = simStats.finished * 1000 / (simStats.lastFinished - simStats.firstFinished);
+            estimatedDuration = simActualConfig.users/actualFinishRate;
+            if (simStatus.status === "finished") {
+                currentDuration = (simStats.lastFinished - simStats.startTime)/1000;
+                progress = 100;
+            } else {
+                currentDuration = (simStats.now - simStats.startTime)/1000;
+                progress = (simStats.finished / simStats.started) * 100;
+            }
+        }
+
+        /// Update DOM on every message from the ws ////
+        App.actualArrivalRate(roundTo2Decimals(actualArrivalRate));
+        App.actualFinishRate(roundTo2Decimals(actualFinishRate));
+        App.estimatedDuration(estimatedDuration);
+        App.currentDuration(currentDuration);
+        App.progress(progress);
+        App.finishedUsers(simStats.finished);
+        App.startedUsers(simStats.started);
 
 
-        actualArrivalRate = simStats.started / (simStats.lastStarted - simStats.firstStarted);
-        actualFinishRate = simStats.finished / (simStats.lastFinished - simStats.firstFinished);
-        estimatedDuraiton = (simStats.firstFinished - simStats.firstStarted) + (simActualConfig.users/actualFinishRate)
-        currentDuration = Math.min((simStats.now - simStats.startTime))
-        remainingTime = estimatedDuraiton - currentDuration;
-        remainingPercentage = (currentDuration / estimatedDuraiton) * 100;
 
-        console.log("remainingTime:", remainingTime);
-        console.log("remainingPrecentage", remainingPercentage);
+
+        console.log("actualArrivalRate:", actualArrivalRate);
+        console.log("actualFinishRate:", actualFinishRate);
+        console.log("estimatedDuration:", estimatedDuration);
+        console.log("currentDuration:", currentDuration);
+        console.log("progress: %s %", progress);
     }
 
+    function calculateStats(devices){
+        /// calculate min/max/mean
+        var min = 100000; //(sec)
+        var result = {
+            max : 0,
+            mean: 0,
+            min: 0,
+            variance: 0
+        };
+        var max = 0; //(sec)
+        var mean;
+        var variance = 0;
+        var i;
+        var currentDevice;
 
+        var totalDuration = 0;
+        var finishedDevices = 0;
+
+        for (i=0;i<devices.length;i++) {
+            currentDevice = devices[i];
+            if (currentDevice.finished) {
+                finishedDevices ++;
+                currentDevice.duration = currentDevice.endTime - currentDevice.startTime;
+                if (currentDevice.duration < min) {
+                    min = currentDevice.duration;
+                }
+                if (currentDevice.duration > max) {
+                    max = currentDevice.duration;
+                }
+                totalDuration += currentDevice.duration;
+            }
+        }
+        mean = (totalDuration/finishedDevices);
+
+        for (i=0;i<finishedDevices;i++){
+            variance += Math.pow((currentDevice.duration - mean),2)
+        }
+        result.min = Math.round(min/10)/100;
+        result.max = Math.round(max/10)/100;
+        result.mean = Math.round(mean/10)/100;
+
+        return result;
+    }
 };
+
+
+///////////////  Simulator GUI Model ///////////////
+
+function AppViewModel() {
+    this.targetArrivalRate = ko.observable(simConfig.targetRate);
+    this.actualArrivalRate = ko.observable(0);
+    this.actualFinishRate = ko.observable(0);
+    this.targetUsers = ko.observable(simActualConfig.users);
+    this.startedUsers = ko.observable(0);
+    this.finishedUsers = ko.observable(0);
+    this.currentDuration = ko.observable(0);
+    this.progress = ko.observable(0);
+    this.estimatedDuration = ko.observable(0);
+
+
+    this.progressDisplay = ko.computed(function() {
+        return this.progress() + "%";
+    }, this)
+
+    this.barWidth = ko.computed(function() {
+        return "width:" + this.progress() + "%";
+    }, this)
+}
+
+var App = new AppViewModel();
+// Activates knockout.js
+ko.applyBindings(App);
+
 
 
 $(document).ready(function () {
@@ -89,48 +215,19 @@ $(document).ready(function () {
         connection.send(JSON.stringify(message));
     });
 
-///    ProgressBar /////////////////////
-    $("#progressBar").dxLinearGauge({
-        scale: {
-            startValue: 0,
-            endValue: 100,
-            majorTick: {
-                showCalculatedTicks: false,
-                customTickValues: [0,10,20,30,40,50,60,70,80,90,100]
-            }
-        },
-        rangeContainer: {
-            backgroundColor: "none",
-            ranges: [
-                {
-                    startValue: 0,
-                    endValue: 100,
-                    color: "#A6C567"
-                }
-            ]
-        },
-        markers: [{ value: 32 }],
-        rangeBars: [{ value: 32 }]
-    });
-
 // Arrival Rate Gauges
     $(".gauge").dxCircularGauge({
-        size: {
-            width: 200,
-            height: 200
-        },
-        margin: {
-            left: 0,
-            right: 0,
-            top: 0,
-            bottom: 0
-        },
         scale: {
             startValue: 0,
             endValue: 10,
             majorTick: {
                 showCalculatedTicks: false,
-                customTickValues: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+                customTickValues: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+            },
+            label : {
+                font :{
+                    size:11
+                }
             }
         },
         rangeContainer: {
@@ -159,3 +256,7 @@ $(document).ready(function () {
     });
 
 });
+
+function roundTo2Decimals(numberToRound) {
+    return Math.round(numberToRound * 100) / 100
+}

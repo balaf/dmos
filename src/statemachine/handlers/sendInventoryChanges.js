@@ -9,6 +9,7 @@ module.exports = function (device, attr, nextState){
     /// mock
     fsmlog.info("sendInventoryChanges: Done!");
     wpilog.info("%s : DLS <-- DEV: Inventory changes", device.mac);
+    device.wpiTimes.push({start: new Date(), end: 0});
 
 
     device.state = nextState;

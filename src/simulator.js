@@ -1,32 +1,38 @@
 'use strict';
 
-// define global vaiable for logging
-global.log = require(__dirname + '/utils/logger').logger;
-global.out = require(__dirname + '/utils/logger').console;
-global.wpilog = require(__dirname + '/utils/logger').wpilog;
-
 var simulation = require(__dirname + '/utils/configurator').simulation;
-var simStats = require(__dirname + '/utils/stats');
+var statistics = require(__dirname + '/utils/stats')
 var Device = require('./deviceObj').deviceObject;
 
-var simConfig = {
-    serverAddress : "10.1.3.4",
-    mac : "03:00:00:00:00:00",
-    be164 : 30210800000,
-    e164 : 4021080000,
-    action: 'logon',
-    users: 10,
-    targetRate: 6 //(users/sec)
-};
+
+var simStats = statistics.init;
+var simConfig = {};
 
 var simStatus = {
     status : "finished"
 }
 
+module.exports.init = function(){
+    log.debug("Initializing Simulation Configuraiton");
+    simConfig = {
+        serverAddress : "10.1.3.4",
+        mac : "03:00:00:00:00:00",
+        be164 : 30210800000,
+        e164 : 4021080000,
+        action: 'logon',
+        users: 10,
+        targetRate: 1 //(users/sec)
+    };
 
+    simStatus = {
+        status : "finished"
+    }
+
+    statistics.reset();
+}
 
 module.exports.start = function(config){
-
+    out.info("Simulation started: ", simConfig.action);
     simStatus.status = "started";
     simConfig = config;
     /// Base values
@@ -38,7 +44,6 @@ module.exports.start = function(config){
 
     var devices = initializeDevices(simConfig.users, baseValues);
 
-    console.log("Started with SimConfig:", JSON.stringify(simConfig));
     simStats.startTime = new Date();
 
     var interval = setInterval(startOne, 1000 / simConfig.targetRate);
@@ -56,7 +61,7 @@ module.exports.start = function(config){
         simStats.started ++;
         ///////////////////////
         currentDevice.startTime = new Date();
-        currentDevice.emit('start','start', currentDevice);
+        currentDevice.emit(simConfig.action, simConfig.action, currentDevice);
 
         // stop starting new if all have started
         if (simStats.started === simConfig.users){
@@ -69,15 +74,20 @@ module.exports.start = function(config){
     function endOne(currentDevice){
         ////
         simStats.finished ++;
-        simStats.lastFinished = new Date();
+        if (simStats.finished === 1) {
+            simStats.firstFinished = new Date();
+            simStats.lastFinished = simStats.firstFinished;
+        } else {
+            simStats.lastFinished = new Date();
+        }
+        simStats.devices.push(currentDevice.wpiTimes);
         ////
         currentDevice.endTime = simStats.lastFinished;
         currentDevice.finished = true;
 
         if (simStats.finished === simConfig.users){
-            console.log('All logons have finished successfully');
+            out.info('All logons have finished successfully');
             simStatus.status = "finished";
-            simStats.print(simConfig.targetRate,simConfig.users);
         }
     }
 
@@ -125,6 +135,7 @@ module.exports.start = function(config){
 
 
 module.exports.stop = function(interval){
+    out.info("Simulation stopped: ", simConfig.action);
     clearInterval(interval);
     simStatus.status = "finished";
 };
@@ -141,6 +152,14 @@ module.exports.getConfig = function () {
 module.exports.getStatus = function () {
     return simStatus;
 };
+
+module.exports.setConfig = function (data) {
+    var propt;
+    for(propt in data){
+        simConfig.propt = data.propt;
+    }
+};
+
 
 
 

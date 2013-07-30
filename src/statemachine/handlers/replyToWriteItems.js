@@ -7,6 +7,7 @@ module.exports = function (device, attr, nextState){
     fsmlog.info("Handler: replyToWriteItems starting for device %s", device.mac);
 
     /// mock
+    device.wpiTimes.push({start: new Date(), end: 0});
     fsmlog.info("send ReplyTo: Done!");
     wpilog.info("%s : DLS <-- DEV: replyTo", device.mac);
 

@@ -7,6 +7,7 @@ module.exports = function (device, attr, nextState){
     fsmlog.info("Handler: sendStartUp starting for device %s", device.mac);
 
     /// mock
+    device.wpiTimes.push({start: new Date(), end: 0});
     fsmlog.info("send StartUp: Done!");
     wpilog.info("%s : DLS <-- DEV: StartUp", device.mac);
 

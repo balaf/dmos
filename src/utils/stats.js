@@ -1,7 +1,7 @@
 'use strict';
 
 var stats = {
-    devices : {},
+    devices : [],
     started : 0,
     finished : 0,
     minDuration : 0,
@@ -10,57 +10,40 @@ var stats = {
     lastStarted : 1,
     lastFinished : 0,
     firstStarted : 0,
-    firstFinished : 0,
-    print : printResults,
-    setMeanDuration : setMean,
-    setMinDuration : setMin,
-    setMaxDuration : setMax
-
+    firstFinished : 0
 };
 
-function printResults(targetArrivalRate, targetUsers){
-    console.log('-------------')
-    console.log('Duration: %dsec = %dmin = %dhr', getDurationSec(stats),getDurationMin(stats),getDurationHr(stats));
-    console.log('Target Arrival Rate (req/sec):', targetArrivalRate);
-    console.log('Achieved Arrival Rate (req/sec):', getArrivalRate(stats));
-    console.log('Target logged-on users:', targetUsers);
-    console.log('Started:', stats.started);
-    console.log('Finished:', stats.finished);
-    console.log('\n\n');
+function updateOnFinish(targetArrivalRate, targetUsers, status){
+
+    /// Duraiton
+    if ((stats.lastFinished === 0) || (stats.firstStarted === 0)) {
+        stats.duration = 0;
+    } else if (status === 'finished') {
+        stats.duration = stats.lastFinished - stats.firstStarted;
+    } else {
+        var now = new Date();
+        stats.duration = now - stats.firstStarted;
+    }
+}
+
+function reset(){
+    stats.devices = [];
+    stats.started = 0;
+    stats.finished = 0;
+    stats.minDuration = 0;
+    stats.maxDuration = 5000000000;
+    stats.meanDuration = 0;
+    stats.lastStarted = 1;
+    stats.lastFinished = 0;
+    stats.firstStarted = 0;
+    stats.firstFinished = 0;
 }
 
 function roundTo2Decimals(numberToRound) {
     return Math.round(numberToRound * 100) / 100
 }
 
-function getDurationSec(stats) {
-    var now = new Date();
-    var duration = (now - stats.firstStarted) / 1000;
-    return roundTo2Decimals(duration)
-}
-
-function getDurationMin(stats) {
-    var now = new Date();
-    var duration = (now - stats.firstStarted) / 1000 / 60;
-    return roundTo2Decimals(duration)
-}
-
-function getDurationHr(stats) {
-    var now = new Date();
-    var duration = (now - stats.firstStarted) / 1000 / 60 / 60;
-    return roundTo2Decimals(duration);
-}
-
-function getArrivalRate(stats) {
-    return stats.started / ((stats.lastStarted - stats.firstStarted)/1000);
-}
-
-function setMin(time) {
-}
-function setMax(time) {
-}
-function setMean(time) {
-}
-
-module.exports = stats;
+module.exports.init = stats;
+module.exports.reset = reset;
+module.exports.update = updateOnFinish;
 

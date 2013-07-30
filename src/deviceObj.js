@@ -19,6 +19,7 @@ function deviceObject (mac, e164, be164) {
     this.duration = 0;
     this.startTime = 0;
     this.endTime = 0;
+    this.wpiTimes = [];
 
     init(this);
 };
@@ -28,9 +29,12 @@ util.inherits(deviceObject,events.EventEmitter);
 module.exports.deviceObject = deviceObject;
 
 function init(obj){
-    obj.on ("start",route);
+    //// logon
+    obj.on ("logon",route);
     obj.on ("WriteItems",route);
     obj.on ("WriteItemsDone",route);
     obj.on ("CleanUp",route);
     obj.on ("CleanUpDone",route);
+    obj.on ("logoff",route);
+    obj.on ("startup",route);
 }

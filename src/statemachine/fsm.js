@@ -36,7 +36,7 @@ fsm.addHandler('noevent',       'any',         handler.defaultHandler);
 
 //// logon
 /////////////// Event            STATE          HANDLER                        NEXT STATE
-fsm.addHandler('start',         'idle',         handler.sendInventoryChanges,  'logon-1');
+fsm.addHandler('logon',         'idle',         handler.sendInventoryChanges,  'logon-1');
 fsm.addHandler('WriteItems',    'logon-1',      handler.handleWriteItems,      'logon-2');
 fsm.addHandler('WriteItemsDone','logon-2',      handler.replyToWriteItems,     'logon-3');
 fsm.addHandler('CleanUp',       'logon-3',      handler.handleCleanUp,         'logon-4');
