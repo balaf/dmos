@@ -24,13 +24,19 @@
     font-size: 11px;
     margin-top: 20px;
     word-wrap: normal;
-    width:100%
+    width:100%;
+    text-align:center;
 }
 
 .gauge {
     float: left;
-    height: 200px;
-    width: 350px;
+    height: 150px;
+    width: 250px;
+}
+
+#queueChart {
+    width:100%;
+    height:150px;
 }
 
 .rate{
@@ -45,8 +51,8 @@
 
 #status{
     width:100%;
-    height: 30px;
-    line-height: 30px;
+    height: 10px;
+    line-height: 10px;
     border: 1px solid darkgray;
     border-radius: 5px;
     background-color: lightgray;
@@ -70,50 +76,12 @@
 }
 
 
-/*configuraiton box */
-#modal {
-      background:#fff;
-      left:50%;
-      margin:-250px 0 0 -40%;
-      position:absolute;
-      top:-50%;
-      width:80%;
-      border-radius:5px;
-      box-shadow:0 0 100px rgba(0, 0, 0, 0.5);
-      box-sizing:border-box;
-      -moz-box-sizing:border-box;
-      -webkit-box-sizing:border-box;
-  }
-/* Make the modal appear when targeted */
-#modal:target {
-    top:350px;
-    transition: all 0.1s ease-in-out;
-    -moz-transition: all 0.4s ease-in-out;
-    -webkit-transition: all 0.4s ease-in-out;
-}
-#modal header,#modal footer {
-    background:#f7f7f7;
-    border-bottom: 1px solid #e7e7e7;
-    border-radius: 5px 5px 0 0;
-    -moz-border-radius: 5px 5px 0 0;
-    -webkit-border-radius: 5px 5px 0 0;
-}
-#modal footer {
-    border:none;
-    border-top: 1px solid #e7e7e7;
-    border-radius: 0 0 5px 5px;
-    -moz-border-radius: 0 0 5px 5px;
-    -webkit-border-radius: 0 0 5px 5px;
-}
-#modal section,#modal header, #modal footer {
-    padding:15px;
-    z-index:200;
-}
-#modal h2 {
-    margin:0;
-}
-#modal .btn {
-    float:right;
-}
+/* modal settings */
+.myModal {
+    width: 700px
 
+}
+.help-block{
+    font-size: 10px;
+}
 

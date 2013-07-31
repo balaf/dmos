@@ -7,8 +7,8 @@ var simConfig = {
     be164 : 30210800000,
     e164 : 4021080000,
     action: 'logon',
-    users: 100,
-    targetRate: 6 //(users/sec)
+    users: 10000,
+    targetRate: 100 //(users/sec)
 };
 
 var simStats = {};
@@ -25,7 +25,9 @@ var progress;
 
 // When the connection is open, send some data to the server
 connection.onopen = function () {
-    connection.send('Ping'); // Send the message 'Ping' to the server
+    connection.send('{action : "ping"}'); // Send the message 'Ping' to the server
+    App.targetArrivalRate(simConfig.targetRate);
+    App.config(simConfig);
 
 };
 
@@ -37,7 +39,6 @@ connection.onerror = function (error) {
 // Log messages from the server
 connection.onmessage = function (e) {
 
-    console.log( e.data);
     var jsonData;
     try {
         jsonData = JSON.parse(e.data);
@@ -45,10 +46,6 @@ connection.onmessage = function (e) {
         console.log(err);
     }
     simStatus = jsonData.status;
-
-    // Update DOM on connection
-    App.targetArrivalRate(simActualConfig.targetRate);
-    App.targetUsers(simActualConfig.users);
 
     // update buttons based on status
     if (simStatus.status === "finished") {
@@ -62,10 +59,6 @@ connection.onmessage = function (e) {
         $('#start').attr('disabled', 'disabled');
     }
 
-    //// configuration pop-up buttons
-    $('#save').click(function(){
-        console.log("Saving form");
-    });
 
     if (jsonData.stats) {
         simStats = jsonData.stats;
@@ -102,9 +95,13 @@ connection.onmessage = function (e) {
                 progress = 100;
             } else {
                 currentDuration = (simStats.now - simStats.startTime)/1000;
-                progress = (simStats.finished / simStats.started) * 100;
+                progress = (simStats.finished / simActualConfig.users) * 100;
             }
         }
+
+        /// Update DOM on every message from the ws ////
+        App.targetArrivalRate(simActualConfig.targetRate);
+        App.targetUsers(simActualConfig.users);
 
         /// Update DOM on every message from the ws ////
         App.actualArrivalRate(roundTo2Decimals(actualArrivalRate));
@@ -115,14 +112,22 @@ connection.onmessage = function (e) {
         App.finishedUsers(simStats.finished);
         App.startedUsers(simStats.started);
 
+        // Update Queue Chart
+        var tmp = { time: simStats.now - simStats.startTime,
+                    started: simStats.started,
+                    finished: simStats.finished,
+                    queue: simStats.started - simStats.finished};
+
+        App.queueChartData.push(tmp);
 
 
 
-        console.log("actualArrivalRate:", actualArrivalRate);
+
+     /*   console.log("actualArrivalRate:", actualArrivalRate);
         console.log("actualFinishRate:", actualFinishRate);
         console.log("estimatedDuration:", estimatedDuration);
         console.log("currentDuration:", currentDuration);
-        console.log("progress: %s %", progress);
+        console.log("progress: %s %", progress);*/
     }
 
     function calculateStats(devices){
@@ -183,15 +188,45 @@ function AppViewModel() {
     this.currentDuration = ko.observable(0);
     this.progress = ko.observable(0);
     this.estimatedDuration = ko.observable(0);
+    this.queueChartData = ko.observableArray();
+    this.config = ko.observable(simConfig);
 
+
+
+    this.queue = ko.computed(function(){
+        return this.startedUsers() - this.finishedUsers();
+    }, this);
+    this.needleTarget = ko.computed(function(){
+        return [{ value: this.targetArrivalRate()}];
+    }, this);
+
+    this.markerTarget = ko.computed(function(){
+        return [{ value: this.targetArrivalRate()}];
+    }, this);
+
+    this.needleActual = ko.computed(function(){
+        return [{ value: this.actualArrivalRate()}];
+    }, this);
+
+    this.markerActual = ko.computed(function(){
+        return [{ value: this.actualArrivalRate()}];
+    }, this);
+
+    this.needleFinished = ko.computed(function(){
+        return [{ value: this.actualFinishRate()}];
+    }, this);
+
+    this.markerFinished = ko.computed(function(){
+        return [{ value: this.actualFinishRate()}];
+    }, this);
 
     this.progressDisplay = ko.computed(function() {
-        return this.progress() + "%";
-    }, this)
+        return roundTo2Decimals(this.progress()) + "%";
+    }, this);
 
     this.barWidth = ko.computed(function() {
         return "width:" + this.progress() + "%";
-    }, this)
+    }, this);
 }
 
 var App = new AppViewModel();
@@ -201,10 +236,20 @@ ko.applyBindings(App);
 
 
 $(document).ready(function () {
+    $("#saveBt").click(function(){
+
+    });
+
+    $("#cancelBt").click(function(){
+        App.config(simConfig);
+    });
+
     $("#start").click(function () {
         var message = {};
         message.action = "start";
         message.config = simConfig;
+        // clean up charts
+        App.queueChartData.removeAll();
 
         connection.send(JSON.stringify(message));
     });
@@ -217,7 +262,27 @@ $(document).ready(function () {
 
 // Arrival Rate Gauges
     $(".gauge").dxCircularGauge({
+        commonNeedleSettings: {
+            offset: 0,
+            type: "triangle"
+        },
+        commonRangeBarSettings: {
+            size: 50,
+            offset:1,
+            text: {
+                font: {
+                    size: 6
+                }
+            }
+        },
         scale: {
+            label: {
+                indentFromTick : 2,
+                font: {
+                    color: "#442211",
+                    size: 6
+                }
+            },
             startValue: 0,
             endValue: 10,
             majorTick: {
@@ -235,11 +300,11 @@ $(document).ready(function () {
             ranges: [{
                 startValue: 0,
                 endValue: 2,
-                color: 'blue'
+                color: 'lightgreen'
             }, {
                 startValue: 2.2,
                 endValue: 5,
-                color: 'green'
+                color: 'yellow'
             }, {
                 startValue: 5.2,
                 endValue: 8,
@@ -251,8 +316,47 @@ $(document).ready(function () {
             }]
 
         },
-        markers: [{ value: 6.1 }],
-        needles: [{ value: 6.1 }]
+        markers: [{ value: simStats.targetArrivalRate }],
+        needles: [{ value: simStats.targetArrivalRate }]
+    });
+
+    $("#queueChart").dxChart({
+        dataSource: [],
+        adjustOnZoom: false,
+        animation :{
+            enabled: false
+        },
+        argumentAxis : {
+            max : 1000*simConfig.users / simConfig.targetRate + 0.1*(1000*simConfig.users / simConfig.targetRate)
+        },
+        valueAxis : {
+            max : simConfig.users + 0.1*simConfig.users
+        },
+        commonAxisSettings: {
+            visible: true,
+            color: 'black',
+            width: 2,
+            grid: {visible:true}
+        },
+        commonSeriesSettings: {
+            border:{
+                visible: true
+            },
+            argumentField: 'time',
+            point: {
+                size: 1
+            }
+        },
+        series: [{
+            name: 'started',
+            valueField: 'started'
+        }, {
+            name: 'finished',
+            valueField: 'finished'
+        }, {
+            name: 'queue',
+            valueField: 'queue'
+        }]
     });
 
 });
