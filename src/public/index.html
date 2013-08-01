@@ -10,7 +10,7 @@
             <div class="container">
                 <div class="page-header">
                     <h1 id="overview">OpenScape DLS Simulator</h1>
-                    <a href="#myModal"data-toggle="modal"  id="conf" class="btn btn-info pull-right">Configuration</a>
+                    <a href="#myModal" data-toggle="modal"  id="conf" class="btn btn-info pull-right">Configuration</a>
                 </div>
                 <div class="row">
                     <div class="col-3 col-lg-3">
@@ -22,7 +22,6 @@
                         <h5 class="center">Actual Arrival Rate:   <span class="rate" data-bind="text: actualArrivalRate"></span> </h5>
                         <div class="gauge" data-bind="dxCircularGauge: { needles : needleActual, markers: markerActual}"></div>
                         <div class="text">View the actual number of requests per second sent that the simulator manages to send</div>
-
                     </div>
                     <div class="col-3 col-lg-3">
                         <h5 class="center">Actual Completion Rate:  <span class="rate" data-bind="text: actualFinishRate"></span></h5>
@@ -30,8 +29,17 @@
                         <div class="text">View the request completion rate acheived by DLS</div>
                     </div>
                     <div class="col-6 col-lg-6">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-5 col-offset-1">.
+                        <h5 class="center">Arrivals/Completion:  <span class="rate" data-bind="text: arrivalVsCompletion"></span></h5>
+                        <div id="ratesChart" class="chart" data-bind="dxChart: {dataSource: rateChartData}"></div>
+                        <div class="text">View the request arrival rate Vs the request completion rate</div>
+                    </div>
+                    <div class="col-lg-5">.
                         <h5 class="center">Queue Size:  <span class="rate" data-bind="text: queue"></span></h5>
-                        <div id="queueChart" data-bind="dxChart: {dataSource: queueChartData}"></div>
+                        <div id="queueChart" class="chart" data-bind="dxChart: {dataSource: queueChartData}"></div>
                         <div class="text">View the number of requests that have arrived in DLS but are not yet finished</div>
                     </div>
                 </div>

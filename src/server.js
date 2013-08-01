@@ -17,6 +17,7 @@ app.use(express.static(__dirname +'/public'));
 var server = http.createServer(app);
 server.listen(18080);
 
+var simulationID;
 
 var wss = new WebSocketServer({server: server});
 wss.on('connection', function(ws) {
@@ -25,10 +26,9 @@ wss.on('connection', function(ws) {
     sendStats(ws);
     ws.on('close', function() {
         out.info('Client disconnected...');
+        clearInterval(updateInterval);
     });
     ws.on('message', function(message) {
-        var simulationID;
-
         var JSONmessage;
         var result;
         try{
@@ -46,16 +46,22 @@ wss.on('connection', function(ws) {
         }
         if (JSONmessage.action === "stop"){
             simulator.stop(simulationID);
-            clearInterval(updateInterval);
+     /*       clearInterval(updateInterval);
             result = getResult();
             sendStats(ws,result);
-            out.info("Results:", result);
+            out.info("Results:", result);*/
         }
         if (JSONmessage.action === "config"){
             simulator.stop(simulationID);
             clearInterval(updateInterval);
             sendStats(ws);
             simulator.setConfig(JSONmessage);
+        }
+        if (JSONmessage.action === "ping"){
+            if (!checkEnd()) {
+              out.info("Reconnecting client to the report stream");
+              updateInterval = setInterval(report, 2000, ws);
+            }
         }
     });
 

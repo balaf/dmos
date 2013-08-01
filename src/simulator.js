@@ -80,7 +80,7 @@ module.exports.start = function(config){
         } else {
             simStats.lastFinished = new Date();
         }
-        simStats.devices.push(currentDevice.wpiTimes);
+       // simStats.devices.push(currentDevice.wpiTimes);
         ////
         currentDevice.endTime = simStats.lastFinished;
         currentDevice.finished = true;
@@ -137,7 +137,8 @@ module.exports.start = function(config){
 module.exports.stop = function(interval){
     out.info("Simulation stopped: ", simConfig.action);
     clearInterval(interval);
-    simStatus.status = "finished";
+    simConfig.users = simStats.started;
+    simStatus.status = "stopped";
 };
 
 module.exports.getStats = function () {

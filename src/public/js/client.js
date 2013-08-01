@@ -25,7 +25,7 @@ var progress;
 
 // When the connection is open, send some data to the server
 connection.onopen = function () {
-    connection.send('{action : "ping"}'); // Send the message 'Ping' to the server
+    connection.send('{"action" : "ping"}'); // Send the message 'Ping' to the server
     App.targetArrivalRate(simConfig.targetRate);
     App.config(simConfig);
 
@@ -53,6 +53,10 @@ connection.onmessage = function (e) {
         $('#start').removeAttr('disabled');
         $('#saveBt').removeAttr('disabled');
 
+    } else if (simStatus.status === "stopped") {
+        $('#stop').attr('disabled', 'disabled');
+        $('#saveBt').attr('disabled', 'disabled');
+        $('#start').attr('disabled', 'disabled');
     } else {
         $('#stop').removeAttr('disabled');
         $('#saveBt').attr('disabled', 'disabled');
@@ -113,12 +117,15 @@ connection.onmessage = function (e) {
         App.startedUsers(simStats.started);
 
         // Update Queue Chart
-        var tmp = { time: simStats.now - simStats.startTime,
-                    started: simStats.started,
-                    finished: simStats.finished,
-                    queue: simStats.started - simStats.finished};
+        var tmpQueueChartData = { time: (simStats.now - simStats.startTime)/1000,
+                     queue : simStats.started - simStats.finished};
 
-        App.queueChartData.push(tmp);
+        var tmpRateChartData = { time: (simStats.now - simStats.startTime)/1000,
+            started: simStats.started,
+            finished: simStats.finished};
+        App.queueChartData.push(tmpQueueChartData);
+        App.rateChartData.push(tmpRateChartData);
+        console.log(tmpRateChartData);
 
 
 
@@ -189,10 +196,14 @@ function AppViewModel() {
     this.progress = ko.observable(0);
     this.estimatedDuration = ko.observable(0);
     this.queueChartData = ko.observableArray();
+    this.rateChartData = ko.observableArray();
     this.config = ko.observable(simConfig);
 
 
 
+    this.arrivalVsCompletion = ko.computed(function(){
+        return roundTo2Decimals(this.actualArrivalRate()/this.actualFinishRate()) || 0;
+    }, this);
     this.queue = ko.computed(function(){
         return this.startedUsers() - this.finishedUsers();
     }, this);
@@ -250,14 +261,19 @@ $(document).ready(function () {
         message.config = simConfig;
         // clean up charts
         App.queueChartData.removeAll();
+        App.rateChartData.removeAll();
 
         connection.send(JSON.stringify(message));
+        $('#start').attr('disabled', 'disabled');
+
     });
     $("#stop").click(function () {
         var message = {};
         message.action = "stop";
 
         connection.send(JSON.stringify(message));
+        $('#stop').attr('disabled', 'disabled');
+
     });
 
 // Arrival Rate Gauges
@@ -320,17 +336,27 @@ $(document).ready(function () {
         needles: [{ value: simStats.targetArrivalRate }]
     });
 
-    $("#queueChart").dxChart({
+    $("#ratesChart").dxChart({
         dataSource: [],
         adjustOnZoom: false,
         animation :{
             enabled: false
         },
         argumentAxis : {
-            max : 1000*simConfig.users / simConfig.targetRate + 0.1*(1000*simConfig.users / simConfig.targetRate)
+            axisDivisionFactor : 20,
+                max : simConfig.users / simConfig.targetRate + 0.1*(simConfig.users / simConfig.targetRate),
+            min : 0,
+            title : {
+                text : "Time (sec)"
+            }
         },
         valueAxis : {
-            max : simConfig.users + 0.1*simConfig.users
+            axisDivisionFactor : 20,
+            max : simConfig.users + 0.1*simConfig.users,
+            min : 0,
+            title : {
+                text : "Number of Requests"
+            }
         },
         commonAxisSettings: {
             visible: true,
@@ -343,20 +369,107 @@ $(document).ready(function () {
                 visible: true
             },
             argumentField: 'time',
+            line: {
+                hoverStyle: {
+                    width: 4
+                }
+            },
+            hoverMode: 'includePoints',
             point: {
-                size: 1
+                size: 2,
+                hoverStyle: {
+                    width: 3
+                }
             }
         },
         series: [{
-            name: 'started',
+            name: 'Requests Started',
             valueField: 'started'
         }, {
-            name: 'finished',
+            name: 'Requests Completed',
             valueField: 'finished'
-        }, {
-            name: 'queue',
+        }],
+        legend: {
+            margin: {
+                top: -10
+            },font : {
+                size: 11
+            },
+            markerSize: 10,
+            verticalAlignment: 'top',
+            horizontalAlignment: 'center',
+            position: 'inside'
+        }
+    });
+
+    $("#queueChart").dxChart({
+        dataSource: [],
+        adjustOnZoom: false,
+        animation :{
+            enabled: false
+        },
+        argumentAxis : {
+            hoverMode: 'allArgumentPoints',
+            axisDivisionFactor : 20,
+            max : simConfig.users / simConfig.targetRate + 0.1*(simConfig.users / simConfig.targetRate),
+            min: 0,
+            title : {
+                text : "Time (sec)"
+            },
+            font : {
+                size: 11
+            }
+        },
+        valueAxis : {
+            axisDivisionFactor : 20,
+            max : (simConfig.users + 0.1*simConfig.users)*0.2,
+            min: 0,
+            title : {
+                text : "Queue Size (#req)"
+            },
+            font : {
+                size: 11
+            }
+        },
+        commonAxisSettings: {
+            visible: true,
+            color: 'black',
+            width: 2,
+            grid: {visible:true}
+        },
+        commonSeriesSettings: {
+            border:{
+                visible: true
+            },
+            argumentField: 'time',
+            line: {
+                hoverStyle: {
+                    width: 4
+                }
+            },
+            hoverMode: 'allArgumentPoints',
+            point: {
+                size: 2,
+                hoverStyle: {
+                    width: 3
+                }
+            }
+        },
+        series: [{
+            name: 'Queue Size',
             valueField: 'queue'
-        }]
+        }],
+        legend: {
+            margin: {
+                top: -10
+            },font : {
+                size: 11
+            },
+            markerSize: 10,
+            verticalAlignment: 'top',
+            horizontalAlignment: 'center',
+            position: 'inside'
+        }
     });
 
 });
