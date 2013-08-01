@@ -1,15 +1,45 @@
 var url = "ws://"+window.location.host;
 var connection = new WebSocket(url);
 
+/// knockout ehnacement
+//wrapper to an observable that requires accept/cancel
+ko.protectedObservable = function(initialValue) {
+    //private variables
+    var _tempValue = initialValue;
+    var _actualValue = ko.observable(initialValue);
+
+    var result = ko.computed({
+       read: _actualValue,
+       write: function(newValue) {
+          _tempValue = newValue;
+        }
+    });
+
+    result.commit = function() {
+        if (_tempValue !== _actualValue()) {
+            _actualValue(_tempValue);
+        }
+    };
+
+    result.reset = function() {
+        _actualValue.valueHasMutated();
+        _tempValue = _actualValue();   //reset temp value
+    };
+
+    return result;
+};
+
 var simConfig = {
     serverAddress : "10.1.3.4",
     mac : "03:00:00:00:00:00",
     be164 : 30210800000,
     e164 : 4021080000,
     action: 'logon',
-    users: 10000,
-    targetRate: 100 //(users/sec)
+    users: 10,
+    targetRate: 1 //(users/sec)
 };
+
+//setInterval(function(){ console.log(simConfig.users)},2000);
 
 var simStats = {};
 var simActualConfig = {};
@@ -27,9 +57,8 @@ var progress;
 connection.onopen = function () {
     connection.send('{"action" : "ping"}'); // Send the message 'Ping' to the server
     App.targetArrivalRate(simConfig.targetRate);
-    App.config(simConfig);
-
 };
+
 
 // Log errors
 connection.onerror = function (error) {
@@ -125,10 +154,6 @@ connection.onmessage = function (e) {
             finished: simStats.finished};
         App.queueChartData.push(tmpQueueChartData);
         App.rateChartData.push(tmpRateChartData);
-        console.log(tmpRateChartData);
-
-
-
 
      /*   console.log("actualArrivalRate:", actualArrivalRate);
         console.log("actualFinishRate:", actualFinishRate);
@@ -198,6 +223,13 @@ function AppViewModel() {
     this.queueChartData = ko.observableArray();
     this.rateChartData = ko.observableArray();
     this.config = ko.observable(simConfig);
+    this.saveConfig = function() {
+      //  this.config.commit();
+        //simConfig = this.config();
+    };
+    this.cancelConfig = function(){
+      //  this.config.reset();
+    };
 
 
 
@@ -238,24 +270,80 @@ function AppViewModel() {
     this.barWidth = ko.computed(function() {
         return "width:" + this.progress() + "%";
     }, this);
+
+    this.queueValueAxis = ko.computed(function(){
+        var axis = {
+            axisDivisionFactor : 20,
+            max : (this.targetUsers() + 0.1*this.targetUsers())*0.8,
+            min: 0,
+            title : {
+                text : "Queue Size (#req)"
+            },
+            font : {
+                size: 11
+            }
+        }
+        return axis;
+    },this);
+
+    this.rateValueAxis = ko.computed(function(){
+        var axis = {
+            axisDivisionFactor : 20,
+                max :  this.targetUsers() + 0.2*this.targetUsers(),
+            min: 0,
+            title : {
+            text : "Queue Size (#req)"
+        },
+            font : {
+                size: 11
+            }
+        }
+        return axis;
+
+    },this);
+
+    this.argAxis = ko.computed(function(){
+      var axis = {
+          hoverMode: 'allArgumentPoints',
+          axisDivisionFactor : 20,
+          max : this.targetUsers() / this.targetArrivalRate() + 0.2*(this.targetUsers() / this.targetArrivalRate()),
+          min: 0,
+          title : {
+              text : "Time (sec)"
+          },
+          font : {
+              size: 11
+          }
+      }
+      return axis;
+    },this);
 }
+
 
 var App = new AppViewModel();
 // Activates knockout.js
 ko.applyBindings(App);
 
-
-
 $(document).ready(function () {
-    $("#saveBt").click(function(){
+    /*$("#saveBt").click(function(){
+        simConfig.serverAddress = $("#serverAddress").val();
+        simConfig.mac = $("#mac").val()
+        simConfig.e164 = $("#e164").val();
+        simConfig.be164 = $("#be164").val();
+        simConfig.action = $("#action").val();
+        simConfig.users = $("#users").val();
+        simConfig.targetRate = $("#targetRate").val();
+        // The new configuration will be send to the server when the simulation starts
+    });*/
 
-    });
-
-    $("#cancelBt").click(function(){
-        App.config(simConfig);
-    });
+   /* $("#cancelBt").click(function(){
+        //console.log(simConfig);
+        //App.config(simConfig);
+    });*/
 
     $("#start").click(function () {
+        //drawQueueChart();
+        //drawRateChart();
         var message = {};
         message.action = "start";
         message.config = simConfig;
@@ -276,7 +364,17 @@ $(document).ready(function () {
 
     });
 
-// Arrival Rate Gauges
+
+    drawGauges();
+    drawRateChart();
+    drawQueueChart();
+});
+
+function roundTo2Decimals(numberToRound) {
+    return Math.round(numberToRound * 100) / 100
+}
+
+function drawGauges(){
     $(".gauge").dxCircularGauge({
         commonNeedleSettings: {
             offset: 0,
@@ -335,73 +433,10 @@ $(document).ready(function () {
         markers: [{ value: simStats.targetArrivalRate }],
         needles: [{ value: simStats.targetArrivalRate }]
     });
+}
 
-    $("#ratesChart").dxChart({
-        dataSource: [],
-        adjustOnZoom: false,
-        animation :{
-            enabled: false
-        },
-        argumentAxis : {
-            axisDivisionFactor : 20,
-                max : simConfig.users / simConfig.targetRate + 0.1*(simConfig.users / simConfig.targetRate),
-            min : 0,
-            title : {
-                text : "Time (sec)"
-            }
-        },
-        valueAxis : {
-            axisDivisionFactor : 20,
-            max : simConfig.users + 0.1*simConfig.users,
-            min : 0,
-            title : {
-                text : "Number of Requests"
-            }
-        },
-        commonAxisSettings: {
-            visible: true,
-            color: 'black',
-            width: 2,
-            grid: {visible:true}
-        },
-        commonSeriesSettings: {
-            border:{
-                visible: true
-            },
-            argumentField: 'time',
-            line: {
-                hoverStyle: {
-                    width: 4
-                }
-            },
-            hoverMode: 'includePoints',
-            point: {
-                size: 2,
-                hoverStyle: {
-                    width: 3
-                }
-            }
-        },
-        series: [{
-            name: 'Requests Started',
-            valueField: 'started'
-        }, {
-            name: 'Requests Completed',
-            valueField: 'finished'
-        }],
-        legend: {
-            margin: {
-                top: -10
-            },font : {
-                size: 11
-            },
-            markerSize: 10,
-            verticalAlignment: 'top',
-            horizontalAlignment: 'center',
-            position: 'inside'
-        }
-    });
 
+function drawQueueChart(){
     $("#queueChart").dxChart({
         dataSource: [],
         adjustOnZoom: false,
@@ -444,14 +479,14 @@ $(document).ready(function () {
             argumentField: 'time',
             line: {
                 hoverStyle: {
-                    width: 4
+                    width: 3
                 }
             },
             hoverMode: 'allArgumentPoints',
             point: {
                 size: 2,
                 hoverStyle: {
-                    width: 3
+                    width: 2
                 }
             }
         },
@@ -471,9 +506,72 @@ $(document).ready(function () {
             position: 'inside'
         }
     });
+}
 
-});
-
-function roundTo2Decimals(numberToRound) {
-    return Math.round(numberToRound * 100) / 100
+function drawRateChart(){
+    $("#ratesChart").dxChart({
+        dataSource: [],
+        adjustOnZoom: false,
+        animation :{
+            enabled: false
+        },
+        argumentAxis : {
+            axisDivisionFactor : 20,
+            max : simConfig.users / simConfig.targetRate + 0.1*(simConfig.users / simConfig.targetRate),
+            min : 0,
+            title : {
+                text : "Time (sec)"
+            }
+        },
+        valueAxis : {
+            axisDivisionFactor : 20,
+            max : simConfig.users + 0.1*simConfig.users,
+            min : 0,
+            title : {
+                text : "Number of Requests"
+            }
+        },
+        commonAxisSettings: {
+            visible: true,
+            color: 'black',
+            width: 2,
+            grid: {visible:true}
+        },
+        commonSeriesSettings: {
+            border:{
+                visible: true
+            },
+            argumentField: 'time',
+            line: {
+                hoverStyle: {
+                    width: 3
+                }
+            },
+            hoverMode: 'includePoints',
+            point: {
+                size: 2,
+                hoverStyle: {
+                    width: 2
+                }
+            }
+        },
+        series: [{
+            name: 'Requests Started',
+            valueField: 'started'
+        }, {
+            name: 'Requests Completed',
+            valueField: 'finished'
+        }],
+        legend: {
+            margin: {
+                top: -10
+            },font : {
+                size: 11
+            },
+            markerSize: 10,
+            verticalAlignment: 'top',
+            horizontalAlignment: 'center',
+            position: 'inside'
+        }
+    });
 }

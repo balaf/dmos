@@ -40,33 +40,33 @@ wss.on('connection', function(ws) {
             log.error("Message received from webSocket cannot be parsed as JSON");
         }
         if (JSONmessage.action === "start"){
-            simulator.init();
             simulationID = simulator.start(JSONmessage.config);
             updateInterval = setInterval(report, 2000, ws);
         }
         if (JSONmessage.action === "stop"){
+            // just stop sending new requests
+            // the simulation will go to status "finished" when all queued request finish
             simulator.stop(simulationID);
-     /*       clearInterval(updateInterval);
-            result = getResult();
-            sendStats(ws,result);
-            out.info("Results:", result);*/
         }
         if (JSONmessage.action === "config"){
-            simulator.stop(simulationID);
-            clearInterval(updateInterval);
-            sendStats(ws);
-            simulator.setConfig(JSONmessage);
+            /// When a new configuraiton is received,
+            /// do nothing.
+            /// New configuraiton is only accepted as part of a 'start' request.
         }
         if (JSONmessage.action === "ping"){
             if (!checkEnd()) {
               out.info("Reconnecting client to the report stream");
+              log.info("Reconnecting client to the report stream");
               updateInterval = setInterval(report, 2000, ws);
             }
         }
     });
 
     function report(ws){
+        // every time a report is send back to the client
+        // a check is made to see if the simulation has finished
         if (checkEnd()) {
+            // if the simulation has finished, stop sending new reports
             clearInterval(updateInterval);
         }
         sendStats(ws);
@@ -77,6 +77,7 @@ wss.on('connection', function(ws) {
         var end = false;
         if (result.status.status === "finished") {
             out.info("Results:", result);
+            log.info("Results:", result);
             end = true;
         }
         return end;

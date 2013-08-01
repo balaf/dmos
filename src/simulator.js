@@ -12,29 +12,16 @@ var simStatus = {
     status : "finished"
 }
 
-module.exports.init = function(){
-    log.debug("Initializing Simulation Configuraiton");
-    simConfig = {
-        serverAddress : "10.1.3.4",
-        mac : "03:00:00:00:00:00",
-        be164 : 30210800000,
-        e164 : 4021080000,
-        action: 'logon',
-        users: 10,
-        targetRate: 1 //(users/sec)
-    };
-
-    simStatus = {
-        status : "finished"
-    }
-
-    statistics.reset();
-}
-
 module.exports.start = function(config){
-    out.info("Simulation started: ", simConfig.action);
-    simStatus.status = "started";
+    // initialize configuration
     simConfig = config;
+    statistics.reset();
+    out.info("Simulation started: ", simConfig);
+    log.info("Simulation started: ", simConfig);
+
+    /// start
+    simStatus.status = "started";
+
     /// Base values
     var baseValues = {
         mac : macToInt(simConfig.mac),
@@ -43,28 +30,36 @@ module.exports.start = function(config){
     };
 
     var devices = initializeDevices(simConfig.users, baseValues);
+    out.info("Initializing %s devices", devices.length);
+    log.info("Initializing %s devices", devices.length);
 
     simStats.startTime = new Date();
 
     var interval = setInterval(startOne, 1000 / simConfig.targetRate);
+    out.info("Interval Duration (msec):", 1000 / simConfig.targetRate);
+    log.info("Interval Duration (msec):", 1000 / simConfig.targetRate);
 
     function startOne(){
-        simStats.lastStarted = new Date();
 
-        var currentDevice = devices[simStats.started];
+
+
         ///// Update Statistics for each new logon
+        var timeNow = new Date();
         if (simStats.started === 0) {
-            simStats.firstStarted = new Date();
-        } else {
-            simStats.lastStarted = new Date();
+            simStats.firstStarted = timeNow;
         }
-        simStats.started ++;
-        ///////////////////////
-        currentDevice.startTime = new Date();
+        simStats.lastStarted = timeNow;
+        var currentDevice = devices[simStats.started];
+        currentDevice.startTime = timeNow;
         currentDevice.emit(simConfig.action, simConfig.action, currentDevice);
 
+        ///////////////////////
+        simStats.started ++;
+
         // stop starting new if all have started
-        if (simStats.started === simConfig.users){
+        // note: simConfig.users is a string
+        //       simStats.started is a number
+        if (simStats.started == simConfig.users){
             /// All logons have started - stop starting new ones
             clearInterval(interval);
             simStatus.status = "allSent";
@@ -85,9 +80,15 @@ module.exports.start = function(config){
         currentDevice.endTime = simStats.lastFinished;
         currentDevice.finished = true;
 
-        if (simStats.finished === simConfig.users){
-            out.info('All logons have finished successfully');
+        if (simStats.finished == simConfig.users){
+            out.info('All started requests have finished successfully');
+            log.info('All started requests have finished successfully');
+            log.info('Started:', simConfig.users);
+            log.info('Finished Successfully:', simStats.finished);
+            log.info('End of the simulation');
+
             simStatus.status = "finished";
+            log.info("Change status to: ", simStatus.status);
         }
     }
 
@@ -136,9 +137,11 @@ module.exports.start = function(config){
 
 module.exports.stop = function(interval){
     out.info("Simulation stopped: ", simConfig.action);
+    log.info("Simulation stopped: ", simConfig.action);
     clearInterval(interval);
     simConfig.users = simStats.started;
     simStatus.status = "stopped";
+    log.info("Change status to: ", simStatus.status);
 };
 
 module.exports.getStats = function () {
@@ -160,7 +163,3 @@ module.exports.setConfig = function (data) {
         simConfig.propt = data.propt;
     }
 };
-
-
-
-

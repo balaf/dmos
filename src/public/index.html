@@ -32,14 +32,14 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-lg-5 col-offset-1">.
+                    <div class="col-lg-5 col-offset-1">
                         <h5 class="center">Arrivals/Completion:  <span class="rate" data-bind="text: arrivalVsCompletion"></span></h5>
-                        <div id="ratesChart" class="chart" data-bind="dxChart: {dataSource: rateChartData}"></div>
+                        <div id="ratesChart" class="chart" data-bind="dxChart: {dataSource: rateChartData, argumentAxis: argAxis, valueAxis: rateValueAxis}"></div>
                         <div class="text">View the request arrival rate Vs the request completion rate</div>
                     </div>
-                    <div class="col-lg-5">.
+                    <div class="col-lg-5">
                         <h5 class="center">Queue Size:  <span class="rate" data-bind="text: queue"></span></h5>
-                        <div id="queueChart" class="chart" data-bind="dxChart: {dataSource: queueChartData}"></div>
+                        <div id="queueChart" class="chart" data-bind="dxChart: {dataSource: queueChartData, argumentAxis: argAxis, valueAxis: queueValueAxis}"></div>
                         <div class="text">View the number of requests that have arrived in DLS but are not yet finished</div>
                     </div>
                 </div>
@@ -61,20 +61,19 @@
 
 
             <!-- Modal -->
-            <div class="modal fade" id="myModal">
+            <div class="modal fade" id="myModal" data-backdrop="static">
                 <div class="modal-dialog myModal">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                             <h4 class="modal-title">Simulation Configuration</h4>
                         </div>
                         <div class="modal-body">
                             <form class="form-horizontal">
                                 <!--  DLS Address -->
                                 <div class="form-group">
-                                    <label for="dlsAddress" class="col-lg-4 control-label">DLS Address</label>
+                                    <label for="serverAddress" class="col-lg-4 control-label">DLS Address</label>
                                     <div class="col-lg-8">
-                                        <input type="text" class="form-control input-small" id="dlsAddress" placeholder="Example: 10.11.1.152" data-bind="value: config().serverAddress">
+                                        <input type="text" class="form-control input-small" id="serverAddress" placeholder="Example: 10.11.1.152" data-bind="value: config().serverAddress">
                                         <span class="help-block">The IP address (or hostname) of the DLS server. This must not include port number or protocol (e.g. http/https)</span>
                                     </div>
                                 </div>
@@ -109,9 +108,9 @@
 
                                 <!--  Scenario -->
                                 <div class="form-group">
-                                    <label for="scenario" class="col-lg-4 control-label">Simulation Scenario</label>
+                                    <label for="action" class="col-lg-4 control-label">Simulation Scenario</label>
                                     <div class="col-lg-8">
-                                        <input type="text" class="form-control input-small" id="scenario" placeholder="Example: logon" data-bind="value: config().action">
+                                        <input type="text" class="form-control input-small" id="action" placeholder="Example: logon" data-bind="value: config().action">
                                     </div>
                                 </div>
 
@@ -126,9 +125,9 @@
 
                                 <!--  Rate -->
                                 <div class="form-group">
-                                    <label for="rate" class="col-lg-4 control-label">Request Rate (per second)</label>
+                                    <label for="targetRate" class="col-lg-4 control-label">Request Rate (per second)</label>
                                     <div class="col-lg-8">
-                                        <input type="text" class="form-control input-small" id="rate" placeholder="Example: 10000" data-bind="value: config().targetRate">
+                                        <input type="text" class="form-control input-small" id="targetRate" placeholder="Example: 10000" data-bind="value: config().targetRate">
                                         <span class="help-block">The number of requests pre second that the simulator will send to DLS</span>
                                     </div>
                                 </div>
@@ -137,8 +136,8 @@
                             </form>
                         </div>
                         <div class="modal-footer">
-                            <a href="#" data-dismiss="modal" id="#cancelBt" class="btn btn-default pull-left">Cancel</a>
-                            <a href="#" data-dismiss="modal" id="#saveBt" class="btn btn-primary">Save changes</a>
+                            <a href="#" data-dismiss="modal" data-bind="click: cancelConfig" id="cancelBt" class="btn btn-default pull-left">Cancel</a>
+                            <a href="#" data-dismiss="modal" data-bind="click: saveConfig" id="saveBt" class="btn btn-primary">Save changes</a>
                         </div>
                     </div><!-- /.modal-content -->
                 </div><!-- /.modal-dialog -->
