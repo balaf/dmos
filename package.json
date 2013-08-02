@@ -15,7 +15,8 @@
       "log4js": "0.6.2",
       "hbs": "2.1.0",
       "sax": "0.5.2",
-      "nconf":">=0.6.7"
+      "nconf":">=0.6.7",
+      "handlebars": "1.0.12"
   },
   "analyze": false,
   "devDependencies": {

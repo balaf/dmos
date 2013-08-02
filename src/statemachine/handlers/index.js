@@ -10,6 +10,7 @@ var handleCleanUp = require(__dirname +'/handleCleanUp');
 var sendStartUp = require(__dirname +'/sendStartUp');
 var sendInventoryChangesII = require(__dirname +'/sendInventoryChangesII');
 var logonFinished = require(__dirname +'/logonFinished');
+var handleOverload = require(__dirname +'/handleOverload');
 
 function defaultHandler(){
     fsmlog.debug ("Default Handler Triggered");
@@ -23,5 +24,6 @@ module.exports = {
     sendStartUp:sendStartUp,
     sendInventoryChangesII:sendInventoryChangesII,
     logonFinished:logonFinished,
-    defaultHandler:defaultHandler
+    defaultHandler:defaultHandler,
+    handleOverload:handleOverload
 };

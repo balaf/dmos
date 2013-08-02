@@ -39,10 +39,7 @@ module.exports.start = function(config){
     out.info("Interval Duration (msec):", 1000 / simConfig.targetRate);
     log.info("Interval Duration (msec):", 1000 / simConfig.targetRate);
 
-    function startOne(){
-
-
-
+    function startOne() {
         ///// Update Statistics for each new logon
         var timeNow = new Date();
         if (simStats.started === 0) {
@@ -52,6 +49,12 @@ module.exports.start = function(config){
         var currentDevice = devices[simStats.started];
         currentDevice.startTime = timeNow;
         currentDevice.emit(simConfig.action, simConfig.action, currentDevice);
+
+        simStats.devices[currentDevice.mac] = {};
+        simStats.devices[currentDevice.mac].startTime = timeNow;
+        simStats.devices[currentDevice.mac].overflow = 0;
+        simStats.devices[currentDevice.mac].progress = "started";
+        simStats.devices[currentDevice.mac].wpiTimes = currentDevice.wpiTimes;;
 
         ///////////////////////
         simStats.started ++;
@@ -68,19 +71,24 @@ module.exports.start = function(config){
 
     function endOne(currentDevice){
         ////
+        var timeNow = new Date();
         simStats.finished ++;
         if (simStats.finished === 1) {
-            simStats.firstFinished = new Date();
+            simStats.firstFinished = timeNow
             simStats.lastFinished = simStats.firstFinished;
         } else {
-            simStats.lastFinished = new Date();
+            simStats.lastFinished = timeNow;
         }
        // simStats.devices.push(currentDevice.wpiTimes);
         ////
         currentDevice.endTime = simStats.lastFinished;
         currentDevice.finished = true;
 
-        if (simStats.finished == simConfig.users){
+        simStats.devices[currentDevice.mac].endTime = timeNow;
+        simStats.devices[currentDevice.mac].progress = "finished";
+        simStats.devices[currentDevice.mac].duration = timeNow - simStats.devices[currentDevice.mac].startTime;
+
+        if (simStats.finished == simConfig.users) {
             out.info('All started requests have finished successfully');
             log.info('All started requests have finished successfully');
             log.info('Started:', simConfig.users);
@@ -155,6 +163,12 @@ module.exports.getConfig = function () {
 
 module.exports.getStatus = function () {
     return simStatus;
+};
+
+module.exports.getFinalStats = function () {
+    statistics.updateOnFinish(simStats);
+    simStats.now = new Date();
+    return simStats;
 };
 
 module.exports.setConfig = function (data) {

@@ -1,21 +1,18 @@
 'use strict';
 
 var stats = {
-    devices : [],
+    devices : {},
     started : 0,
     finished : 0,
-    minDuration : 0,
-    maxDuration : 5000000000,
-    meanDuration : 0,
     lastStarted : 1,
     lastFinished : 0,
     firstStarted : 0,
     firstFinished : 0
 };
 
-function updateOnFinish(targetArrivalRate, targetUsers, status){
+function updateOnFinish(status) {
 
-    /// Duraiton
+    /// Duraton
     if ((stats.lastFinished === 0) || (stats.firstStarted === 0)) {
         stats.duration = 0;
     } else if (status === 'finished') {
@@ -24,19 +21,32 @@ function updateOnFinish(targetArrivalRate, targetUsers, status){
         var now = new Date();
         stats.duration = now - stats.firstStarted;
     }
+    stats.actualArrivalRate = stats.started / ((stats.lastStarted - stats.firstStarted) / 1000);
+    stats.actualFinishRate = stats.finished / ((stats.lastFinished - stats.firstFinished) / 1000);
+    stats.success = 100 * stats.finished / stats.started;
+    stats.min = getMin(stats.devices);
+    stats.max = getMax(stats.devices);
+    stats.mean = getMean (stats.devices);
+    stats.variance = getVariance (stats.devices, stats.mean);
+    stats.histogram = getHistogram (stats.devices);
 }
 
-function reset(){
-    stats.devices = [];
+function reset() {
+    stats.devices = {};
     stats.started = 0;
     stats.finished = 0;
-    stats.minDuration = 0;
-    stats.maxDuration = 5000000000;
-    stats.meanDuration = 0;
     stats.lastStarted = 1;
     stats.lastFinished = 0;
     stats.firstStarted = 0;
     stats.firstFinished = 0;
+    stats.actualArrivalRate = 0;
+    stats.actualFinishRate = 0;
+    stats.success = 0;
+    stats.min = 0;
+    stats.max = 0;
+    stats.mean = 0;
+    stats.variance = 0;
+    stats.histogram = [];
 }
 
 function roundTo2Decimals(numberToRound) {
@@ -45,5 +55,89 @@ function roundTo2Decimals(numberToRound) {
 
 module.exports.init = stats;
 module.exports.reset = reset;
-module.exports.update = updateOnFinish;
+module.exports.updateOnFinish = updateOnFinish;
 
+
+function getMin(devices) {
+    var min = 500000000;
+    var mac;
+
+    for (mac in devices) {
+        if (devices.hasOwnProperty(mac)) {
+            if (devices[mac].progress === "finished") {
+                if (devices[mac].duration < min) {
+                   min =  devices[mac].duration;
+                }
+            }
+        }
+    }
+    return min;
+}
+
+function getMax(devices) {
+    var max = 0;
+    var mac;
+
+    for (mac in devices) {
+        if (devices.hasOwnProperty(mac)) {
+            if (devices[mac].progress === "finished") {
+                if (devices[mac].duration > max) {
+                    max =  devices[mac].duration;
+                }
+            }
+        }
+    }
+    return max;
+
+}
+
+function getMean(devices) {
+    var total = 0;
+    var mac;
+    var finished = 0;
+
+    for (mac in devices) {
+        if (devices.hasOwnProperty(mac)) {
+            if (devices[mac].progress === "finished") {
+                total += devices[mac].duration;
+                finished++;
+            }
+        }
+    }
+    return total/finished;
+}
+
+function getVariance (devices, mean) {
+    var total = 0;
+    var mac;
+    var finished = 0;
+
+    for (mac in devices) {
+        if (devices.hasOwnProperty(mac)) {
+            if (devices[mac].progress === "finished") {
+                total += Math.pow((devices[mac].duration-mean),2);
+                finished++;
+            }
+        }
+    }
+
+    return Math.sqrt(total/finished);
+}
+
+function getHistogram(devices){
+    var histo = [];
+
+    var mac;
+    var finished = 0;
+
+    for (mac in devices) {
+        if (devices.hasOwnProperty(mac)) {
+            if (devices[mac].progress === "finished") {
+                histo.push(devices[mac].duration);
+            } else {
+                histo.push(0);
+            }
+        }
+    }
+    return histo;
+}

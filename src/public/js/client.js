@@ -91,6 +91,7 @@ connection.onmessage = function (e) {
         $('#saveBt').attr('disabled', 'disabled');
         $('#start').attr('disabled', 'disabled');
     }
+    console.log("Status:", simStatus.status);
 
 
     if (jsonData.stats) {
@@ -133,8 +134,8 @@ connection.onmessage = function (e) {
         }
 
         /// Update DOM on every message from the ws ////
-        App.targetArrivalRate(simActualConfig.targetRate);
-        App.targetUsers(simActualConfig.users);
+        App.targetArrivalRate(simConfig.targetRate);
+        App.targetUsers(simConfig.users);
 
         /// Update DOM on every message from the ws ////
         App.actualArrivalRate(roundTo2Decimals(actualArrivalRate));
@@ -214,7 +215,7 @@ function AppViewModel() {
     this.targetArrivalRate = ko.observable(simConfig.targetRate);
     this.actualArrivalRate = ko.observable(0);
     this.actualFinishRate = ko.observable(0);
-    this.targetUsers = ko.observable(simActualConfig.users);
+    this.targetUsers = ko.observable(simConfig.users);
     this.startedUsers = ko.observable(0);
     this.finishedUsers = ko.observable(0);
     this.currentDuration = ko.observable(0);
@@ -226,6 +227,7 @@ function AppViewModel() {
     this.saveConfig = function() {
       //  this.config.commit();
         //simConfig = this.config();
+        console.log('simConfig.user',simConfig.users)
     };
     this.cancelConfig = function(){
       //  this.config.reset();
@@ -274,7 +276,7 @@ function AppViewModel() {
     this.queueValueAxis = ko.computed(function(){
         var axis = {
             axisDivisionFactor : 20,
-            max : (this.targetUsers() + 0.1*this.targetUsers())*0.8,
+            //max : (this.targetUsers() + 0.1*this.targetUsers())*0.8,
             min: 0,
             title : {
                 text : "Queue Size (#req)"
@@ -289,15 +291,19 @@ function AppViewModel() {
     this.rateValueAxis = ko.computed(function(){
         var axis = {
             axisDivisionFactor : 20,
-                max :  this.targetUsers() + 0.2*this.targetUsers(),
+               // max :  this.targetUsers() + 0.2*this.targetUsers(),
             min: 0,
             title : {
-            text : "Queue Size (#req)"
-        },
+                 text : "Number of Requests"
+            },
             font : {
                 size: 11
             }
         }
+        console.log("target users:", this.targetUsers()) ;
+        console.log('Config:',simConfig);
+        console.log('ActualConfig:',simActualConfig);
+        console.log('Axis',axis.max);
         return axis;
 
     },this);
@@ -306,7 +312,7 @@ function AppViewModel() {
       var axis = {
           hoverMode: 'allArgumentPoints',
           axisDivisionFactor : 20,
-          max : this.targetUsers() / this.targetArrivalRate() + 0.2*(this.targetUsers() / this.targetArrivalRate()),
+          max : this.targetUsers() / this.targetArrivalRate() + 60,
           min: 0,
           title : {
               text : "Time (sec)"
@@ -439,14 +445,14 @@ function drawGauges(){
 function drawQueueChart(){
     $("#queueChart").dxChart({
         dataSource: [],
-        adjustOnZoom: false,
+        adjustOnZoom: true,
         animation :{
             enabled: false
         },
         argumentAxis : {
             hoverMode: 'allArgumentPoints',
             axisDivisionFactor : 20,
-            max : simConfig.users / simConfig.targetRate + 0.1*(simConfig.users / simConfig.targetRate),
+            max : simConfig.users / simConfig.targetRate + 60,
             min: 0,
             title : {
                 text : "Time (sec)"
@@ -457,7 +463,7 @@ function drawQueueChart(){
         },
         valueAxis : {
             axisDivisionFactor : 20,
-            max : (simConfig.users + 0.1*simConfig.users)*0.2,
+            //max : (simConfig.users + 0.1*simConfig.users)*0.2,
             min: 0,
             title : {
                 text : "Queue Size (#req)"
@@ -495,14 +501,14 @@ function drawQueueChart(){
             valueField: 'queue'
         }],
         legend: {
-            margin: {
-                top: -10
-            },font : {
+            font : {
                 size: 11
             },
+            paddingLeftRight: 2,
+            paddingTopBottom: 2,
             markerSize: 10,
-            verticalAlignment: 'top',
-            horizontalAlignment: 'center',
+            verticalAlignment: 'bottom',
+            horizontalAlignment: 'right',
             position: 'inside'
         }
     });
@@ -517,7 +523,7 @@ function drawRateChart(){
         },
         argumentAxis : {
             axisDivisionFactor : 20,
-            max : simConfig.users / simConfig.targetRate + 0.1*(simConfig.users / simConfig.targetRate),
+            max : simConfig.users / simConfig.targetRate + 60,
             min : 0,
             title : {
                 text : "Time (sec)"
@@ -525,7 +531,7 @@ function drawRateChart(){
         },
         valueAxis : {
             axisDivisionFactor : 20,
-            max : simConfig.users + 0.1*simConfig.users,
+            max : simConfig.users + 0.2*simConfig.users,
             min : 0,
             title : {
                 text : "Number of Requests"
@@ -563,15 +569,17 @@ function drawRateChart(){
             valueField: 'finished'
         }],
         legend: {
-            margin: {
-                top: -10
-            },font : {
+            font : {
                 size: 11
             },
+            paddingLeftRight: 2,
+            paddingTopBottom: 2,
             markerSize: 10,
-            verticalAlignment: 'top',
-            horizontalAlignment: 'center',
-            position: 'inside'
+            verticalAlignment: 'bottom',
+            horizontalAlignment: 'right',
+            position: 'inside',
+            rowCount: 2,
+            rowItemSpacing: 5
         }
     });
 }

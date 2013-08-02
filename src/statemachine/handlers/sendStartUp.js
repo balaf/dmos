@@ -7,7 +7,7 @@ module.exports = function (device, attr, nextState){
     fsmlog.info("Handler: sendStartUp starting for device %s", device.mac);
 
     /// mock
-    device.wpiTimes.push({start: new Date(), end: 0});
+    device.wpiTimes.push({start: new Date(), end: 0, status: "sent", type: "startUp", overload: 0});
     fsmlog.info("send StartUp: Done!");
     wpilog.info("%s : DLS <-- DEV: StartUp", device.mac);
 
@@ -15,7 +15,7 @@ module.exports = function (device, attr, nextState){
     device.state = nextState;
     fsmlog.info("sendStartUp: New state for device %s is %s", device.mac, device.state);
 
-    // mock writeItems reception
+    // mock cleanUp reception
     device.emit("CleanUp", "CleanUp", device, {a:1} );
     wpilog.info("%s :DLS --> DEV: CleanUp", device.mac);
 

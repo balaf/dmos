@@ -6,7 +6,7 @@ var fsm = require(__dirname +'/fsm').fsm;
 
 module.exports = function (event,obj,attr){
     var nextState;
-    fsmlog.info ("Router received event: " + event + " for device: " + obj.id + " which is at state:" +obj.state);
+    fsmlog.info ("Router received event: " + event + " for device: " + obj.mac + " which is at state:" +obj.state);
 
     // check if this is a valid event for the given state
     if (fsm[event]){

@@ -68,14 +68,18 @@ wss.on('connection', function(ws) {
         if (checkEnd()) {
             // if the simulation has finished, stop sending new reports
             clearInterval(updateInterval);
+            sendStats(ws,getFinalResult());
         }
-        sendStats(ws);
+        else {
+            sendStats(ws);
+        }
     }
 
     function checkEnd (){
         var result = getResult();
         var end = false;
         if (result.status.status === "finished") {
+            result = getFinalResult();
             out.info("Results:", result);
             log.info("Results:", result);
             end = true;
@@ -87,6 +91,14 @@ wss.on('connection', function(ws) {
         return {
             status : simulator.getStatus(),
             stats : simulator.getStats(),
+            config : simulator.getConfig()
+        };
+    }
+
+    function getFinalResult(){
+        return {
+            status : simulator.getStatus(),
+            stats : simulator.getFinalStats(),
             config : simulator.getConfig()
         };
     }
