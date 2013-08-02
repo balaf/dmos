@@ -35,7 +35,7 @@ module.exports = function (device, nextState){
             var wpiMsg = wpiMsgTemplate(createMsg(device,2));
 
             /// send request goes here
-            /// mock
+
             fsmlog.info("sendInventoryChanges: Done!");
             wpilog.info("%s : DLS <-- DEV: Inventory changes", device.mac);
             wpilog.info(wpiMsg);

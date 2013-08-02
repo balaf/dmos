@@ -11,6 +11,6 @@ module.exports = function (device, nextState){
 
     device.state = nextState;
     out.debug('New State:', device.state);
-    device.emit("startup1", "startup1", device);
+    device.emit("startup", "startup", device);
 
 }

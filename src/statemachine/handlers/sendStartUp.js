@@ -10,12 +10,13 @@ var responseHandler = require(__dirname + '/../../client/response');
 module.exports = function (device, nextState){
     fsmlog.info("Handler: sendStartUp starting for device %s", device.mac);
 
-    switch (device.status){
+    switch (device.state){
         case 'logon-4':
             device.mobilityState = 2;
             var wpiMsg = wpiMsgTemplate(createMsg(device));
             break;
         case 'startup':
+            var wpiMsg = wpiMsgTemplate(createMsg(device));
             break;
     }
 

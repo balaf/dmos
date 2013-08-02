@@ -37,7 +37,7 @@ function response(res,device) {
                     case 'CleanUp':
                         if (wpiObj.itemList) {
                             if (wpiObj.itemList['cleanup-reason'] === "overload") {
-                                device.emit("overload", "overload", device);
+                                device.emit("Overload", "Overload", device);
                             }
                         }
                         break;

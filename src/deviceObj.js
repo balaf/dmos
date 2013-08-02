@@ -31,17 +31,17 @@ module.exports.deviceObject = deviceObject;
 
 function init(obj){
     //// logon
-    obj.on ("logon",route);
-    obj.on ("logoff",route);
-    obj.on ("startup",route);
-    obj.on ("WriteItems",route);
-    obj.on ("WriteItemsDone",route);
-    obj.on ("ReadItems",route);
-    obj.on ("ReadItemsDone",route);
-    obj.on ("ReadAllItems",route);
-    obj.on ("ReadAllItemsDone",route);
-    obj.on ("CleanUp",route);
-    obj.on ("CleanUpDone",route);
-    obj.on ("logoff",route);
-    obj.on ("Overload",route);
+    obj.on("logon", route);
+    obj.on("logoff", route);
+    obj.on("startup", route);
+    obj.on("WriteItems", route);
+    obj.on("WriteItemsDone", route);
+    obj.on("ReadItems", route);
+    obj.on("ReadItemsDone", route);
+    obj.on("ReadAllItems", route);
+    obj.on("ReadAllItemsDone", route);
+    obj.on("CleanUp", route);
+    obj.on("CleanUpDone", route);
+    obj.on("logoff", route);
+    obj.on("Overload", route);
 }

@@ -13,51 +13,68 @@ module.exports = function (device, nextState){
         switch(device.state) {
             case 'logon-1': // overload received at the initial inv-changes
                 fsmlog.info("re-send inv-changes: Done!");
-                wpilog.info("%s : DLS <-- DEV: replyTo", device.mac);
-
-
-                // mock writeItems reception
                 device.state = nextState;
-                device.emit("WriteItems", "WriteItems", device);
-                wpilog.info("%s : DLS --> DEV: Write Items", device.mac);
-
+                device.emit("logon", "logon", device);
                 break;
             case 'logon-3':  // reply to
                 fsmlog.info("re-send replyTo: Done!");
-                wpilog.info("%s : DLS <-- DEV: replyTo", device.mac);
-
-                // mock CleanUp reception
                 device.state = nextState;
-                device.emit("CleanUp", "CleanUp", device);
-                wpilog.info("%s :DLS --> DEV: CleanUp", device.mac);
-
+                device.emit("WriteItemsDone", "WriteItemsDone", device);
                 break;
             case 'logon-5':  // startup
                 fsmlog.info("re-send startUp: Done!");
-                wpilog.info("%s : DLS <-- DEV: replyTo", device.mac);
-
-                // mock writeItems reception
                 device.state = nextState;
-                device.emit("CleanUp", "CleanUp", device);
-                wpilog.info("%s :DLS --> DEV: CleanUp", device.mac);
+                device.emit("CleanUpDone", "CleanUpDone", device);
                 break;
             case 'logon-7':  // inv-changes
                 fsmlog.info("re-send inv-changes2: Done!");
-                wpilog.info("%s : DLS <-- DEV: replyTo", device.mac);
-
-                // mock writeItems reception         but may be a cleanup (or overload)
                 device.state = nextState;
-                device.emit("WriteItems", "WriteItems", device);
-                wpilog.info("%s : DLS --> DEV: Write Items", device.mac);
+                device.emit("CleanUpDone", "CleanUpDone", device);
                 break;
             case 'logon-9':  // reply to
                 fsmlog.info("re-send replyTo: Done!");
-                wpilog.info("%s : DLS <-- DEV: replyTo", device.mac);
-
-                // mock CleanUp reception
                 device.state = nextState;
-                device.emit("CleanUp", "CleanUp", device);
-                wpilog.info("%s :DLS --> DEV: CleanUp", device.mac);
+                device.emit("WriteItemsDone", "WriteItemsDone", device);
+                break;
+            case 'startup-1':  // inv-changes
+                fsmlog.info("re-send inv-changes: Done!");
+                device.state = nextState;
+                device.emit("startup", "startup", device);
+                break;
+            case 'startup-3':  // reply to
+                fsmlog.info("re-send replyTo: Done!");
+                device.state = nextState;
+                device.emit("WriteItemsDone", "WriteItemsDone", device);
+                break;
+            case 'startup-6':  // reply to
+                fsmlog.info("re-send replyTo: Done!");
+                device.state = nextState;
+                device.emit("ReadItemsDone", "ReadItemsDone", device);
+                break;
+            case 'startup-7':  // reply to
+                fsmlog.info("re-send replyTo: Done!");
+                device.state = nextState;
+                device.emit("ReadAllItemsDone", "ReadAllItemsDone", device);
+                break;
+            case 'logoff-1':  // inv-changes
+                fsmlog.info("re-send inv-changes: Done!");
+                device.state = nextState;
+                device.emit("logoff", "logoff", device);
+                break;
+            case 'logoff-3':  // reply tp
+                fsmlog.info("re-send replyTo: Done!");
+                device.state = nextState;
+                device.emit("ReadItemsDone", "ReadItemsDone", device);
+                break;
+            case 'logoff-5':  // start up
+                fsmlog.info("re-send start-up: Done!");
+                device.state = nextState;
+                device.emit("CleanUpDone", "CleanUpDone", device);
+                break;
+            case 'logoff-7':  // reply to
+                fsmlog.info("re-send replyTo: Done!");
+                device.state = nextState;
+                device.emit("ReadAllItemsDone", "ReadAllItemsDone", device);
                 break;
         }
     },time*1000);
