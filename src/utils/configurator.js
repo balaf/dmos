@@ -36,7 +36,7 @@ nconf.defaults({
                     "type": "file",
                     "absolute": true,
                     "filename": "../log/dmos.log",
-                    "maxLogSize": 20480,
+                    "maxLogSize": 200000,
                     "backups": 3,
                     "category": "default-log"
                 },

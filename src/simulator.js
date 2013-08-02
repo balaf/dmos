@@ -48,6 +48,7 @@ module.exports.start = function(config){
         simStats.lastStarted = timeNow;
         var currentDevice = devices[simStats.started];
         currentDevice.startTime = timeNow;
+        log.debug("Emit %s for device %s", simConfig.action, currentDevice.mac)
         currentDevice.emit(simConfig.action, simConfig.action, currentDevice);
 
         simStats.devices[currentDevice.mac] = {};
@@ -67,6 +68,7 @@ module.exports.start = function(config){
             clearInterval(interval);
             simStatus.status = "allSent";
         }
+        log.debug("%d startedOne finished", currentDevice.mac);
     }
 
     function endOne(currentDevice){

@@ -73,18 +73,3 @@ hbs.registerHelper("itemList", function(obj, options) {
 var template = hbs.compile(src);
 
 module.exports =  template;
-
-
-
-/*              TEST
-var dlsMsg = new wpiObject();
-dlsMsg.addNonce('aaaaaaaaaaaaaa');
-dlsMsg.addRfc('reply-to', {'status': 'Accepted', 'action':'ReadItems'});
-var items = { 'userdat-aring' : { value : 'zzzzzzzzzzzz'},
-
-};
-dlsMsg.addItems(items);
-console.log(dlsMsg);
-
-var result = template(dlsMsg);
-console.log(result)*/

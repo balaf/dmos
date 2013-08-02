@@ -4,34 +4,32 @@ var fsmlog = require(__dirname + '/../../utils/logger').fsmlog;
 
 var createMsg = require(__dirname + '/../../wpi/wpiObject').invChages;
 var wpiMsgTemplate = require( __dirname + '/../../wpi/wpiMessageTemplate');
+var sendToDLS = require(__dirname + '/../../client/request');
+var responseHandler = require(__dirname + '/../../client/response');
 
 
-module.exports = function (device, attr, nextState){
+
+
+module.exports = function (device, nextState){
     fsmlog.info("Handler: sendInventoryChanges starting for device %s", device.mac);
     switch(device.state) {
         case 'logon':
             var wpiMsg = wpiMsgTemplate(createMsg(device,1));
 
-            /// send request goes here
-            /// mock
-            fsmlog.info("sendInventoryChanges: Done!");
             wpilog.info("%s : DLS <-- DEV: Inventory changes", device.mac);
             wpilog.info(wpiMsg);
             device.wpiTimes.push({start: new Date(), end: 0, status: "sent", type: "inventory-changes", overload: 0});
 
+            sendToDLS(wpiMsg,device,function(res){
+                fsmlog.info("sendInventoryChanges: Done");
+                device.state = nextState;
+                fsmlog.info("New state for device %s is %s", device.mac, device.state);
+                responseHandler(res,device);
 
-            device.state = nextState;
-            fsmlog.info("sendInventoryChanges: New state for device %s is %s", device.mac, device.state);
-
-            // mock writeItems reception
-            if (getRandomInt(0,10) <= 10) {
-                device.emit("WriteItems", "WriteItems", device, {a:1} );
-                wpilog.info("%s : DLS --> DEV: Write Items", device.mac)
-            } else {
-                device.emit("Overload", "Overload", device, {a:1} );
-                wpilog.info("%s : DLS --> DEV: Overload", device.mac)
-            }
-
+            }, function(error){
+                //??? not sure what to do
+                out.error('Unhandled Error');
+            })
             break;
         case 'logon-6':
             var wpiMsg = wpiMsgTemplate(createMsg(device,2));
@@ -44,17 +42,16 @@ module.exports = function (device, attr, nextState){
             device.wpiTimes.push({start: new Date(), end: 0, status: "sent", type: "inventory-changes", overload: 0});
 
 
-            device.state = nextState;
-            fsmlog.info("sendInventoryChanges: New state for device %s is %s", device.mac, device.state);
+            sendToDLS(wpiMsg,device,function(res){
+                fsmlog.info("sendInventoryChanges: Done");
+                device.state = nextState;
+                fsmlog.info("New state for device %s is %s", device.mac, device.state);
+                responseHandler(res,device);
 
-            // mock writeItems reception         but may be a cleanup (or overload)
-            device.emit("WriteItems", "WriteItems", device, {a:1} );
-            wpilog.info("%s : DLS --> DEV: Write Items", device.mac);
+            }, function(error){
+                //??? not sure what to do
+                out.error('Unhandled Error');
+            })
             break;
     }
-}
-
-
-function getRandomInt (min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
 }

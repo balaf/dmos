@@ -3,7 +3,7 @@
 var fsmlog = require(__dirname + '/../../utils/logger').fsmlog;
 
 
-module.exports = function (device, attr, nextState){
+module.exports = function (device, nextState){
     fsmlog.info("Handler: Overload starting for device %s", device.mac);
     device.wpiTimes[device.wpiTimes.length-1].overload++;
     var time = getRandomInt();
@@ -18,7 +18,7 @@ module.exports = function (device, attr, nextState){
 
                 // mock writeItems reception
                 device.state = nextState;
-                device.emit("WriteItems", "WriteItems", device, {a:1} );
+                device.emit("WriteItems", "WriteItems", device);
                 wpilog.info("%s : DLS --> DEV: Write Items", device.mac);
 
                 break;
@@ -28,7 +28,7 @@ module.exports = function (device, attr, nextState){
 
                 // mock CleanUp reception
                 device.state = nextState;
-                device.emit("CleanUp", "CleanUp", device, {a:1} );
+                device.emit("CleanUp", "CleanUp", device);
                 wpilog.info("%s :DLS --> DEV: CleanUp", device.mac);
 
                 break;
@@ -38,7 +38,7 @@ module.exports = function (device, attr, nextState){
 
                 // mock writeItems reception
                 device.state = nextState;
-                device.emit("CleanUp", "CleanUp", device, {a:1} );
+                device.emit("CleanUp", "CleanUp", device);
                 wpilog.info("%s :DLS --> DEV: CleanUp", device.mac);
                 break;
             case 'logon-7':  // inv-changes
@@ -47,7 +47,7 @@ module.exports = function (device, attr, nextState){
 
                 // mock writeItems reception         but may be a cleanup (or overload)
                 device.state = nextState;
-                device.emit("WriteItems", "WriteItems", device, {a:1} );
+                device.emit("WriteItems", "WriteItems", device);
                 wpilog.info("%s : DLS --> DEV: Write Items", device.mac);
                 break;
             case 'logon-9':  // reply to
@@ -56,7 +56,7 @@ module.exports = function (device, attr, nextState){
 
                 // mock CleanUp reception
                 device.state = nextState;
-                device.emit("CleanUp", "CleanUp", device, {a:1} );
+                device.emit("CleanUp", "CleanUp", device);
                 wpilog.info("%s :DLS --> DEV: CleanUp", device.mac);
                 break;
         }

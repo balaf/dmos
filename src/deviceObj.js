@@ -11,7 +11,7 @@ function deviceObject (mac, e164, be164) {
     this.mac = mac || "03:00:00:00:00:01";
     this.user = e164 ||  "302008010001";
     this.be164 = be164 || "802008010001";
-    this.e164 = this.be164;
+    this.e164 = be164 || "802008010001";
     this.state = "idle";
     this.cookie = '';
     this.mobilityState = '1'; // logoff
@@ -20,7 +20,7 @@ function deviceObject (mac, e164, be164) {
     this.startTime = 0;
     this.endTime = 0;
     this.wpiTimes = [];
-    this.pass = "123456";
+    this.pass = "000000";
 
     init(this);
 };
@@ -32,8 +32,14 @@ module.exports.deviceObject = deviceObject;
 function init(obj){
     //// logon
     obj.on ("logon",route);
+    obj.on ("logoff",route);
+    obj.on ("startup",route);
     obj.on ("WriteItems",route);
     obj.on ("WriteItemsDone",route);
+    obj.on ("ReadItems",route);
+    obj.on ("ReadItemsDone",route);
+    obj.on ("ReadAllItems",route);
+    obj.on ("ReadAllItemsDone",route);
     obj.on ("CleanUp",route);
     obj.on ("CleanUpDone",route);
     obj.on ("logoff",route);
