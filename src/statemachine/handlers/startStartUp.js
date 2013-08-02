@@ -9,13 +9,8 @@ module.exports = function (device, nextState){
     device.e164 = device.be164;
 
 
-    out.debug("Next Stateeee", nextState);
-
-    out.debug("beee Stateeee");
-
-
-    //device.state = "startup-0";//nextState;
-
-   // device.emit("startup", "startup", device);
+    device.state = nextState;
+    out.debug('New State:', device.state);
+    device.emit("startup1", "startup1", device);
 
 }

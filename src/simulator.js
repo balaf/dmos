@@ -68,7 +68,7 @@ module.exports.start = function(config){
             clearInterval(interval);
             simStatus.status = "allSent";
         }
-        log.debug("%d startedOne finished", currentDevice.mac);
+        log.debug("%s startedOne finished", currentDevice.mac);
     }
 
     function endOne(currentDevice){

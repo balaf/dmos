@@ -43,6 +43,5 @@ function init(obj){
     obj.on ("CleanUp",route);
     obj.on ("CleanUpDone",route);
     obj.on ("logoff",route);
-    obj.on ("startup",route);
     obj.on ("Overload",route);
 }

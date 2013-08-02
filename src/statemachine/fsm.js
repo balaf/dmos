@@ -56,7 +56,7 @@ fsm.addHandler('CleanUp',       'logon-9',      handler.simFinished,           '
 
 //// startUp
 fsm.addHandler('startup',       'idle',         handler.startStartUp,          'startup-0');
-fsm.addHandler('startup',       'startup-0',    handler.sendStartUp,           'startup-1');
+fsm.addHandler('startup1',      'startup-0',    handler.sendStartUp,           'startup-1');
 
 //1
 fsm.addHandler('Overload',      'startup-1',    handler.handleOverload,        'startup-1');
