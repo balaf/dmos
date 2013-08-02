@@ -36,7 +36,8 @@ fsm.addHandler('noevent',       'any',         handler.defaultHandler);
 
 //// logon
 /////////////// Event            STATE          HANDLER                        NEXT STATE
-fsm.addHandler('logon',         'idle',         handler.sendInventoryChanges,  'logon-1');
+fsm.addHandler('logon',         'idle',         handler.startlogon,            'logon');
+fsm.addHandler('logon',         'logon',        handler.sendInventoryChanges,  'logon-1');
 fsm.addHandler('Overload',      'logon-1',      handler.handleOverload,        'logon-1');
 fsm.addHandler('WriteItems',    'logon-1',      handler.handleWriteItems,      'logon-2');
 fsm.addHandler('WriteItemsDone','logon-2',      handler.replyToWriteItems,     'logon-3');
@@ -45,7 +46,7 @@ fsm.addHandler('CleanUp',       'logon-3',      handler.handleCleanUp,         '
 fsm.addHandler('CleanUpDone',   'logon-4',      handler.sendStartUp,           'logon-5');
 fsm.addHandler('Overload',      'logon-5',      handler.handleOverload,        'logon-5');
 fsm.addHandler('CleanUp',       'logon-5',      handler.handleCleanUp,         'logon-6');
-fsm.addHandler('CleanUpDone',   'logon-6',      handler.sendInventoryChangesII,'logon-7');
+fsm.addHandler('CleanUpDone',   'logon-6',      handler.sendInventoryChanges,  'logon-7');
 fsm.addHandler('Overload',      'logon-7',      handler.handleOverload,        'logon-7');
 fsm.addHandler('CleanUp',       'logon-7',      handler.logonFinished,         'idle');
 fsm.addHandler('WriteItems',    'logon-7',      handler.handleWriteItems,      'logon-8');

@@ -20,6 +20,7 @@ function deviceObject (mac, e164, be164) {
     this.startTime = 0;
     this.endTime = 0;
     this.wpiTimes = [];
+    this.pass = "123456";
 
     init(this);
 };
