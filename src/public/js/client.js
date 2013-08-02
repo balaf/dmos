@@ -114,9 +114,9 @@ connection.onmessage = function (e) {
         actualFinishRate = 0;
         estimatedDuration = 0;
         currentDuration = 0;
-        progress = 0;
-
+        progress = (simStats.finished + simStats.failed/ simActualConfig.users) * 100;
         /// 1. none or only one has yet finished
+
         if (simStats.finished <=1) {
             actualArrivalRate = simStats.started * 1000 / (simStats.lastStarted - simStats.firstStarted);
         }
@@ -124,12 +124,12 @@ connection.onmessage = function (e) {
             actualArrivalRate = simStats.started * 1000 / (simStats.lastStarted - simStats.firstStarted);
             actualFinishRate = simStats.finished * 1000 / (simStats.lastFinished - simStats.firstFinished);
             estimatedDuration = simActualConfig.users/actualFinishRate;
+
             if (simStatus.status === "finished") {
                 currentDuration = (simStats.lastFinished - simStats.startTime)/1000;
-                progress = 100;
             } else {
                 currentDuration = (simStats.now - simStats.startTime)/1000;
-                progress = (simStats.finished / simActualConfig.users) * 100;
+
             }
         }
 
@@ -359,6 +359,7 @@ $(document).ready(function () {
 
         connection.send(JSON.stringify(message));
         $('#start').attr('disabled', 'disabled');
+        progress = 0;
 
     });
     $("#stop").click(function () {

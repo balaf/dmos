@@ -6,7 +6,6 @@ global.log = require(__dirname + '/utils/logger').logger;
 global.out = require(__dirname + '/utils/logger').console;
 global.wpilog = require(__dirname + '/utils/logger').wpilog;
 
-
 var express = require('express');
 var http = require('http');
 var app = express();
@@ -82,6 +81,9 @@ wss.on('connection', function(ws) {
             result = getFinalResult();
             out.info("Results:", result);
             log.info("Results:", result);
+            end = true;
+        } else if (result.stats.finished + result.stats.failed == result.config.users){
+            simulator.setStatus("finished");
             end = true;
         }
         return end;

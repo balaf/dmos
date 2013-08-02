@@ -4,6 +4,7 @@ var stats = {
     devices : {},
     started : 0,
     finished : 0,
+    failed: 0,
     lastStarted : 1,
     lastFinished : 0,
     firstStarted : 0,
@@ -35,6 +36,7 @@ function reset() {
     stats.devices = {};
     stats.started = 0;
     stats.finished = 0;
+    stats.failed = 0;
     stats.lastStarted = 1;
     stats.lastFinished = 0;
     stats.firstStarted = 0;

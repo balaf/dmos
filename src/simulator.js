@@ -1,9 +1,8 @@
 'use strict';
 
 var simulation = require(__dirname + '/utils/configurator').simulation;
-var statistics = require(__dirname + '/utils/stats')
+var statistics = require(__dirname + '/utils/stats');
 var Device = require('./deviceObj').deviceObject;
-
 
 var simStats = statistics.init;
 var simConfig = {};
@@ -90,11 +89,12 @@ module.exports.start = function(config){
         simStats.devices[currentDevice.mac].progress = "finished";
         simStats.devices[currentDevice.mac].duration = timeNow - simStats.devices[currentDevice.mac].startTime;
 
-        if (simStats.finished == simConfig.users) {
+        if (simStats.finished + simStats.failed == simConfig.users) {
             out.info('All started requests have finished successfully');
             log.info('All started requests have finished successfully');
             log.info('Started:', simConfig.users);
             log.info('Finished Successfully:', simStats.finished);
+            log.info('Failed:', simStats.failed);
             log.info('End of the simulation');
 
             simStatus.status = "finished";
@@ -144,6 +144,17 @@ module.exports.start = function(config){
     return interval;
 };
 
+module.exports.setStatus = function(status) {
+    simStatus.status = status;
+};
+
+module.exports.setStats = function(obj) {
+    for (var key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            simStats.key = obj.key;
+        }
+    }
+};
 
 module.exports.stop = function(interval){
     out.info("Simulation stopped: ", simConfig.action);
@@ -178,4 +189,13 @@ module.exports.setConfig = function (data) {
     for(propt in data){
         simConfig.propt = data.propt;
     }
+};
+
+module.exports.setFailed = function(){
+    out.info("Failed:", simStats.failed)
+    simStats.failed++;
+};
+
+module.exports.getSimConfig = function() {
+    return simConfig;
 };

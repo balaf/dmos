@@ -18,7 +18,11 @@ module.exports = function (device, nextState){
 
             wpilog.info("%s : DLS <-- DEV: Inventory changes", device.mac);
             wpilog.info(wpiMsg);
-            device.wpiTimes.push({start: new Date(), end: 0, status: "sent", type: "inventory-changes", overload: 0});
+            if (device.wpiTimes.length > 0) {
+                if (device.wpiTimes[device.wpiTimes.length-1].status === "finished") {
+                    device.wpiTimes.push({start: new Date(), end: 0, status: "sent", type: "inventory-changes", overload: 0});
+                }
+            }
 
             sendToDLS(wpiMsg,device,function(res){
                 fsmlog.info("sendInventoryChanges: Done");
@@ -39,7 +43,9 @@ module.exports = function (device, nextState){
             fsmlog.info("sendInventoryChanges: Done!");
             wpilog.info("%s : DLS <-- DEV: Inventory changes", device.mac);
             wpilog.info(wpiMsg);
-            device.wpiTimes.push({start: new Date(), end: 0, status: "sent", type: "inventory-changes", overload: 0});
+            if (device.wpiTimes[device.wpiTimes.length-1].status === "finished") {
+                device.wpiTimes.push({start: new Date(), end: 0, status: "sent", type: "inventory-changes", overload: 0});
+            }
 
 
             sendToDLS(wpiMsg,device,function(res){
@@ -48,9 +54,6 @@ module.exports = function (device, nextState){
                 fsmlog.info("New state for device %s is %s", device.mac, device.state);
                 responseHandler(res,device);
 
-            }, function(error){
-                //??? not sure what to do
-                out.error('Unhandled Error');
             })
             break;
     }

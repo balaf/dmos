@@ -12,7 +12,9 @@ module.exports = function (device, nextState){
 
     var wpiMsg = wpiMsgTemplate(createMsg(device));
 
-    device.wpiTimes.push({start: new Date(), end: 0, status: "sent", type: "replyTo", overload: 0});
+    if (device.wpiTimes[device.wpiTimes.length-1].status === "finished") {
+        device.wpiTimes.push({start: new Date(), end: 0, status: "sent", type: "inventory-changes", overload: 0});
+    }
     fsmlog.info("send ReplyTo: Done!");
     wpilog.info("%s : DLS <-- DEV: replyTo", device.mac);
     wpilog.info(wpiMsg);
@@ -24,9 +26,6 @@ module.exports = function (device, nextState){
         fsmlog.info("New state for device %s is %s", device.mac, device.state);
         responseHandler(res,device);
 
-    }, function(error){
-        //??? not sure what to do
-        out.error('Unhandled Error');
     })
 }
 

@@ -1,13 +1,14 @@
 'use strict';
 
 var https = require('https');
-var simConfig = require(__dirname + '/../utils/config');
 
 
-function sendRequest(msg,obj,callback, err) {
-    out.debug("sending message:", msg);
-    out.debug("sending message:", obj);
+var simulator = require(__dirname + '/../simulator');
 
+
+
+function sendRequest(msg,obj,callback) {
+    var simConfig = simulator.getSimConfig();
     var options = {
         ciphers: 'DES-CBC-SHA',
         host: simConfig.serverAddress,
@@ -24,8 +25,8 @@ function sendRequest(msg,obj,callback, err) {
     var req = https.request(options,callback);
 
     req.on('error', function(e) {
-        out.error('Request could not be sent: ' + e.message);
-        err(e);
+        log.error('Request could not be sent: ' + e.message);
+        simulator.setFailed();
     });
 
     req.write(msg);
