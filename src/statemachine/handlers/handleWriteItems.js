@@ -9,10 +9,11 @@ module.exports = function (device, nextState){
     device.wpiTimes[device.wpiTimes.length-1].duration = device.wpiTimes[device.wpiTimes.length-1].end - device.wpiTimes[device.wpiTimes.length-1].start;
     device.wpiTimes[device.wpiTimes.length-1].status = "finished";
 
+    device.state = nextState;
     setTimeout(function (){
         fsmlog.info("Handler: handleWriteItems: Done!!");
         device.emit("WriteItemsDone", "WriteItemsDone", device);
     },3000);
 
-    device.state = nextState;
+
 }

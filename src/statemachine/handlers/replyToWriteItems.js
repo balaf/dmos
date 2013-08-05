@@ -13,20 +13,41 @@ module.exports = function (device, nextState){
     var wpiMsg = wpiMsgTemplate(createMsg(device));
 
     if (device.wpiTimes[device.wpiTimes.length-1].status === "finished") {
-        device.wpiTimes.push({start: new Date(), end: 0, status: "sent", type: "inventory-changes", overload: 0});
+        device.wpiTimes.push({start: new Date(), end: 0, status: "sent", type: "reply-to", overload: 0});
     }
     fsmlog.info("send ReplyTo: Done!");
     wpilog.info("%s : DLS <-- DEV: replyTo", device.mac);
     wpilog.info(wpiMsg);
 
-
-    sendToDLS(wpiMsg,device,function(res){
-        fsmlog.info("sendInventoryChanges: Done");
+    if (isRealSimulation) {
+        sendToDLS(wpiMsg,device,function(res){
+            fsmlog.info("send Reply-to: Done");
+            device.state = nextState;
+            fsmlog.info("New state for device %s is %s", device.mac, device.state);
+            responseHandler(res,device);
+        });
+    } else {
+        fsmlog.info("send Reply-to: Done");
         device.state = nextState;
         fsmlog.info("New state for device %s is %s", device.mac, device.state);
-        responseHandler(res,device);
+        var random = getRandomInt(1,3);
+        if (random < 2.1) {
+            device.emit("CleanUp", "CleanUp", device);
+        } else {
+            device.emit("Overload", "Overload", device);
+            fsmlog.info("Overlooooaaaaddddd");
+        }
+    }
+}
 
-    });
+function getRandomInt (min, max) {
+    if (!max) {
+        max = 60;
+    }
+    if (!min) {
+        min = 20;
+    }
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 

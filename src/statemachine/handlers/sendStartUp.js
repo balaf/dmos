@@ -18,23 +18,38 @@ module.exports = function (device, nextState){
         case 'startup':
             var wpiMsg = wpiMsgTemplate(createMsg(device));
             break;
+        case 'logoff-4':
+            device.mobilityState = 1;
+            device.e164 = device.be164;
+            var wpiMsg = wpiMsgTemplate(createMsg(device));
+            break;
     }
 
     if (device.wpiTimes.length > 0) {
         if (device.wpiTimes[device.wpiTimes.length-1].status === "finished") {
-            device.wpiTimes.push({start: new Date(), end: 0, status: "sent", type: "inventory-changes", overload: 0});
+            device.wpiTimes.push({start: new Date(), end: 0, status: "sent", type: "start-up", overload: 0});
         }
+    } else {
+        device.wpiTimes.push({start: new Date(), end: 0, status: "sent", type: "start-up", overload: 0});
     }
     fsmlog.info("send StartUp: Done!");
     wpilog.info("%s : DLS <-- DEV: StartUp", device.mac);
     wpilog.info(wpiMsg);
 
-
-    sendToDLS(wpiMsg,device,function(res){
-        fsmlog.info("sendStartUp: Done");
+    if (isRealSimulation) {
+        sendToDLS(wpiMsg,device,function(res){
+            fsmlog.info("sendStartUp: Done");
+            device.state = nextState;
+            fsmlog.info("New state for device %s is %s", device.mac, device.state);
+            responseHandler(res,device);
+        });
+    } else {
         device.state = nextState;
-        fsmlog.info("New state for device %s is %s", device.mac, device.state);
-        responseHandler(res,device);
+        if (nextState === "startup-1") {
+            device.emit("WriteItems", "WriteItems", device);
+        } else {
+            device.emit("CleanUp", "CleanUp", device);
+        }
+    }
 
-    })
 }

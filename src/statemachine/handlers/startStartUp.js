@@ -8,9 +8,7 @@ module.exports = function (device, nextState){
     device.mobilityState = 1;
     device.e164 = device.be164;
 
-
     device.state = nextState;
-    out.debug('New State:', device.state);
     device.emit("startup", "startup", device);
 
 }

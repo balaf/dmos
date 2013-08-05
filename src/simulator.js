@@ -110,7 +110,7 @@ module.exports.start = function(config){
         for (var i=0;i<num;i++){
             mac =  decToMac(i+baseValues.mac)
             dev[i] = new Device(mac, i+baseValues.e164, i+baseValues.be164);
-            dev[i].on("logonFinished", endOne)
+            dev[i].on("simFinished", endOne);
         }
         return dev;
     }

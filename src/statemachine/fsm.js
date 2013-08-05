@@ -72,7 +72,7 @@ fsm.addHandler('Overload',      'startup-1',    handler.handleOverload,        '
 fsm.addHandler('WriteItems',    'startup-1',    handler.handleWriteItems,      'startup-2');
 fsm.addHandler('ReadItems',     'startup-1',    handler.handleReadItems,       'startup-4');
 fsm.addHandler('ReadAllItems',  'startup-1',    handler.handleReadAllItems,    'startup-5');
-fsm.addHandler('CleanUp',       'startup-1',    handler.handleCleanUp,         'startup-6');
+fsm.addHandler('CleanUp',       'startup-1',    handler.handleCleanUp,         'startup-last');
 //2
 fsm.addHandler('WriteItemsDone','startup-2',    handler.replyToWriteItems,     'startup-3');
 //3
@@ -121,7 +121,7 @@ fsm.addHandler('ReadAllItemsDone','logoff-6',    handler.handleReadAllItemsDone,
 fsm.addHandler('Overload',      'logoff-7',    handler.handleOverload,         'logoff-6');
 fsm.addHandler('CleanUp',       'logoff-7',    handler.handleCleanUp,          'logoff-8');
 //8
-fsm.addHandler('CleanUpDone',   'logoff-7',    handler.simFinished,            'idle');
+fsm.addHandler('CleanUpDone',   'logoff-8',    handler.simFinished,            'idle');
 
 
 module.exports.fsm = fsm;

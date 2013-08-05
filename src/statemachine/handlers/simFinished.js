@@ -10,5 +10,5 @@ module.exports = function (device, nextState){
     device.wpiTimes[device.wpiTimes.length-1].status = "finished";
 
     device.state = nextState;
-//    device.emit("logonFinished", device);
+    device.emit("simFinished", device);
 }

@@ -110,7 +110,12 @@
                                 <div class="form-group">
                                     <label for="action" class="col-lg-4 control-label">Simulation Scenario</label>
                                     <div class="col-lg-8">
-                                        <input type="text" class="form-control input-small" id="action" placeholder="Example: logon" data-bind="value: config().action">
+                                       <!--  <input type="text" class="form-control input-small" id="action" placeholder="Example: logon" data-bind="value: config().action"> -->
+                                        <select class="form-control" data-bind="value: config().action">
+                                            <option value="logon">Log On</option>
+                                            <option value="startup">Start</option>
+                                            <option value="logoff">Log off</option>
+                                        </select>
                                     </div>
                                 </div>
 

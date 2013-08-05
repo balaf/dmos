@@ -2,6 +2,7 @@
 'use strict';
 
 // define global vaiable for logging
+global.isRealSimulation = false;
 global.log = require(__dirname + '/utils/logger').logger;
 global.out = require(__dirname + '/utils/logger').console;
 global.wpilog = require(__dirname + '/utils/logger').wpilog;

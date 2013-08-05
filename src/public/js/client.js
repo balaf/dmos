@@ -114,7 +114,8 @@ connection.onmessage = function (e) {
         actualFinishRate = 0;
         estimatedDuration = 0;
         currentDuration = 0;
-        progress = (simStats.finished + simStats.failed/ simActualConfig.users) * 100;
+        progress = ((simStats.finished + simStats.failed)/ simActualConfig.users) * 100 || 0;
+        console.log("progress:", progress);
         /// 1. none or only one has yet finished
 
         if (simStats.finished <=1) {
