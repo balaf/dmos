@@ -34,10 +34,13 @@ wpiObject.prototype.addItems = function(items) {
     }
 };
 
-wpiObject.prototype.addNonce = function(nonce) {
-    if (nonce) {
+wpiObject.prototype.addNonce = function(nonce, final) {
+    if (final) {
+        this.message = {'nonce' : nonce, 'fragment': 'final'};
+    } else {
         this.message = {'nonce' : nonce};
     }
+
 };
 
 // Example: device.addRfc('ReadAllItems', {'status': 'Accepted'});
@@ -160,7 +163,7 @@ function replyToWrite(device){
     var wpiMsg = new wpiObject();
 
     wpiMsg.addNonce(createNonce());
-    wpiMsg.addRfc('reply-to', { 'status' : 'Accepted', 'action' :'WriteItems'});
+    wpiMsg.addRfc('reply-to', { 'status' : 'accepted', 'action' :'WriteItems'});
 
     return wpiMsg
 }
@@ -169,7 +172,7 @@ function replyToReadUnmanaged(device){
     var wpiMsg = new wpiObject();
 
     wpiMsg.addNonce(createNonce());
-    wpiMsg.addRfc('reply-to', { 'status' : 'Accepted', 'action' :'ReadItems'});
+    wpiMsg.addRfc('reply-to', { 'status' : 'accepted', 'action' :'ReadItems'});
 
     var items = {
         'userdata-vu1' : {'index' : '1', 'value' : 'AAEAAC90bXAvcHJpb3JpdHlfY2h1bmtpbmcudG1wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQABAAEAAVF3e8lXAAAAI1ZFUlNJT049MDIwMAojPE9DTVNUYWc+LDxJdGVtVmFsdWU+CmJ0LWF1dGgsZmFsc2UKb3Blbi1saXN0ZW5pbmctdm9sdW1lLDMKa2V5LW1vZHVsZS1kaXNwbGF5LWNvbnRyYXN0LDMKYnQtcGFpcmluZywxCnJpbmdlci12b2x1bWUsMQpidC1waW4sMDAwMApoZWFkc2V0LXZvbHVtZSw4CnVzZXItcHdkLWxhc3RjaGFuZ2VkLDEzNjY3ODQ3NDkKYnQtZGlzY292ZXJhYmxlLGZhbHNlCmxhbXAtYnJpZ2h0bmVzcywzCmhhbmRzZnJlZS12b2x1bWUsOApjYWxsLWRuZC1hY3RpdmF0ZWQsZmFsc2UKZm9yY2UtdXBkYXRlLGZhbHNlCnJpbmdlci1lbmFibGVkLHRydWUKYnQtbG9jYWwtbmFtZSxPcGVuU3RhZ2UgMDA6MUE6RTg6MkQ6M0Y6MDgKY2FsbC1mb3J3YXJkaW5nLWVuYWJsZWQsdHJ1ZQpidC1hY3RpdmUsZmFsc2UKYnQtZW5jcnlwdCxmYWxzZQp3YXJuLXRvbmUtdm9sdW1lLDEKYnQtbGFzdC1jb25uLWNsYXNzLDAKdG91Y2hndWlkZS1zZW5zaXRpdml0eSwxCmhhbmRzZXQtdm9sdW1lLDMKZGlzcGxheS1jb250cmFzdCwzCj=='},
@@ -192,7 +195,7 @@ function replyToReadAll(device){
     var wpiMsg = new wpiObject();
 
     wpiMsg.addNonce(createNonce());
-    wpiMsg.addRfc('reply-to', { 'status' : 'Accepted', 'action' :'ReadAllItems'});
+    wpiMsg.addRfc('reply-to', { 'status' : 'accepted', 'action' :'ReadAllItems'});
 
     var items = {
         'device-type' : {'value' : 'OpenStage 60'},

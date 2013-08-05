@@ -15,7 +15,7 @@ module.exports = function (device, nextState){
             var wpiMsg = wpiMsgTemplate(createMsgReadUM(device));
             break;
         default:
-
+            var wpiMsg = wpiMsgTemplate(createMsgReadUM(device));
             break;
     }
 

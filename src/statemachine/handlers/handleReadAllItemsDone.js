@@ -12,6 +12,9 @@ module.exports = function (device, nextState){
 
     var wpiMsg = wpiMsgTemplate(createMsg(device));
 
+    /// send the message
+    wpilog.info("%s : DLS <-- DEV: reply-to", device.mac);
+    wpilog.info(wpiMsg);
     if (device.wpiTimes.length > 0) {
         if (device.wpiTimes[device.wpiTimes.length-1].status === "finished") {
             device.wpiTimes.push({start: new Date(), end: 0, status: "sent", type: "reply-to", overload: 0});
@@ -22,7 +25,7 @@ module.exports = function (device, nextState){
 
     if (isRealSimulation) {
         sendToDLS(wpiMsg,device,function(res){
-            fsmlog.info("sendReplyTo RedAll : Done");
+            fsmlog.info("sendReplyTo ReadAll : Done");
             device.state = nextState;
             fsmlog.info("New state for device %s is %s", device.mac, device.state);
             responseHandler(res,device);

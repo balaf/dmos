@@ -1,6 +1,7 @@
 'use strict';
 
 var https = require('https');
+var fs = require('fs');
 
 
 var simulator = require(__dirname + '/../simulator');
@@ -10,7 +11,8 @@ var simulator = require(__dirname + '/../simulator');
 function sendRequest(msg,obj,callback) {
     var simConfig = simulator.getSimConfig();
     var options = {
-        ciphers: 'DES-CBC-SHA',
+        //ciphers: 'DHE-RSA-AES128-SHA256',
+        secureProtocol: 'TLSv1_client_method',
         host: simConfig.serverAddress,
         port: 18443,
         path: '/DeploymentService/LoginService',
@@ -19,13 +21,19 @@ function sendRequest(msg,obj,callback) {
             'Content-Type': 'text/xml; charset=UTF-8',
             'Content-Length': Buffer.byteLength(msg),
             'Cookie' : obj.cookie
-        }
+        } ,
+        key: fs.readFileSync( __dirname + '/../../cert/key.pem'),
+        cert: fs.readFileSync( __dirname + '/../../cert/cert.pem'),
+        ca: fs.readFileSync( __dirname + '/../../cert/cert.pem'),
+        rejectUnauthorized: false
     };
+    out.info("Header:", options.headers)
 
     var req = https.request(options,callback);
 
     req.on('error', function(e) {
         log.error('Request could not be sent: ' + e.message);
+        out.error('Request could not be sent: ' + e.message);
         simulator.setFailed();
     });
 

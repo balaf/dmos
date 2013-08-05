@@ -1,6 +1,10 @@
 'use strict';
 
 var wpiParser = require( __dirname + '/../wpi/wpiParser');
+var fsmlog = require(__dirname + '/../utils/logger').fsmlog;
+
+var simulator = require(__dirname + '/../simulator');
+
 
 function getRandomInt (min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -28,10 +32,15 @@ function response(res,device) {
 
         wpiParser(responseText,function(wpiObj){
             out.debug('Reply from Server:',wpiObj);
+
             if (!wpiObj.isWPI) {
-                out.error("Response from DLS is not recognized as a WPI message")
+                out.error("Response from DLS is not recognized as a WPI message:")
+                wpilog.debug("Response from DLS is not recognized as a WPI message:", res.headers)
+                wpilog.debug("Response from DLS is not recognized as a WPI message:", responseText)
+                simulator.setFailed();
             } else {
-                wpilog.info("%s : DLS --> DEV: %s", device.mac, wpiObj.rfc)
+                out.debug('RFC:',wpiObj.rfc['value']);
+                wpilog.info("%s : DLS --> DEV: %s", device.mac, wpiObj.rfc['value'])
                 wpilog.info(responseText);
                 switch (wpiObj.rfc){
                     case 'CleanUp':
@@ -42,7 +51,8 @@ function response(res,device) {
                         }
                         break;
                     default:
-                        device.emit(wpiObj.rfc, wpiObj.rfc, device);
+                        fsmlog.debug("Emit Event:", wpiObj.rfc['value']);
+                        device.emit(wpiObj.rfc['value'], wpiObj.rfc['value'], device);
                         break;
                 }
             }

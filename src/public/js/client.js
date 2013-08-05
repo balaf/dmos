@@ -30,9 +30,9 @@ ko.protectedObservable = function(initialValue) {
 };
 
 var simConfig = {
-    serverAddress : "10.0.201.250",
+    serverAddress : "10.5.62.10",
     mac : "03:00:00:00:00:00",
-    be164 : 30210800000,
+    be164 : 3021080000,
     e164 : 4021080000,
     action: 'startup',
     users: 1,
@@ -224,30 +224,51 @@ function AppViewModel() {
     this.estimatedDuration = ko.observable(0);
     this.queueChartData = ko.observableArray();
     this.rateChartData = ko.observableArray();
-    this.config = ko.observable(simConfig);
+    this.config = {
+            serverAddress : ko.protectedObservable(simConfig.serverAddress),
+            mac : ko.protectedObservable(simConfig.mac),
+            be164 : ko.protectedObservable(simConfig.be164),
+            e164 : ko.protectedObservable(simConfig.e164),
+            action: ko.protectedObservable(simConfig.action),
+            users: ko.protectedObservable(simConfig.users),
+            targetRate: ko.protectedObservable(simConfig.targetRate) //(users/sec)
+        };
+   /* this.targetArrivalRate = ko.computed(function(){
+          return this.config().targetRate();
+    },this)
+
+    this.targetUsers = ko.computed(function(){
+        return this.config().users();
+    },this)
+*/
+    this.deviceStats = ko.observableArray(simStats.devices);
+
     this.saveConfig = function() {
-      //  this.config.commit();
-        //simConfig = this.config();
-        console.log('simConfig.user',simConfig.users)
+        for (var key in this.config) {
+            this.config[key].commit();
+            simConfig[key] = this.config[key]();
+        }
     };
     this.cancelConfig = function(){
-      //  this.config.reset();
+        for (var key in this.config) {
+            this.config[key].reset();
+            simConfig[key] = this.config[key]();
+        }
     };
 
 
 
     this.arrivalVsCompletion = ko.computed(function(){
-        return roundTo2Decimals(this.actualArrivalRate()/this.actualFinishRate()) || 0;
+        var result;
+        if (this.actualFinishRate() == 0) {
+            result = "N/A";
+        } else {
+            result =roundTo2Decimals(this.actualArrivalRate()/this.actualFinishRate());
+        }
+        return result;
     }, this);
     this.queue = ko.computed(function(){
         return this.startedUsers() - this.finishedUsers();
-    }, this);
-    this.needleTarget = ko.computed(function(){
-        return [{ value: this.targetArrivalRate()}];
-    }, this);
-
-    this.markerTarget = ko.computed(function(){
-        return [{ value: this.targetArrivalRate()}];
     }, this);
 
     this.needleActual = ko.computed(function(){
@@ -277,7 +298,7 @@ function AppViewModel() {
     this.queueValueAxis = ko.computed(function(){
         var axis = {
             axisDivisionFactor : 20,
-            //max : (this.targetUsers() + 0.1*this.targetUsers())*0.8,
+            //max : (this.targetUsers() + 0.2*this.targetUsers()),
             min: 0,
             title : {
                 text : "Queue Size (#req)"
@@ -292,7 +313,7 @@ function AppViewModel() {
     this.rateValueAxis = ko.computed(function(){
         var axis = {
             axisDivisionFactor : 20,
-               // max :  this.targetUsers() + 0.2*this.targetUsers(),
+           // max : (this.targetUsers() + 0.2*this.targetUsers()),
             min: 0,
             title : {
                  text : "Number of Requests"
@@ -301,7 +322,7 @@ function AppViewModel() {
                 size: 11
             }
         }
-        console.log("target users:", this.targetUsers()) ;
+       // console.log("target users:", this.targetUsers()) ;
         console.log('Config:',simConfig);
         console.log('ActualConfig:',simActualConfig);
         console.log('Axis',axis.max);
@@ -313,7 +334,8 @@ function AppViewModel() {
       var axis = {
           hoverMode: 'allArgumentPoints',
           axisDivisionFactor : 20,
-          max : this.targetUsers() / this.targetArrivalRate() + 60,
+        //  max : this.targetUsers() / this.targetArrivalRate() + 60,
+          //max : simConfig.users / simConfig.targetRate + 60,
           min: 0,
           title : {
               text : "Time (sec)"
@@ -358,7 +380,15 @@ $(document).ready(function () {
         App.queueChartData.removeAll();
         App.rateChartData.removeAll();
 
+        var tmpQueueChartData = { time: 0, queue : 0};
+
+        var tmpRateChartData = { time: 0, started: 0, finished: 0};
+        App.queueChartData.push(tmpQueueChartData);
+        App.rateChartData.push(tmpRateChartData);
+
+
         connection.send(JSON.stringify(message));
+        console.log(JSON.stringify(message));
         $('#start').attr('disabled', 'disabled');
         progress = 0;
 
@@ -446,7 +476,7 @@ function drawGauges(){
 
 function drawQueueChart(){
     $("#queueChart").dxChart({
-        dataSource: [],
+        dataSource: [{ time: 0, started: 0, finished: 0}],
         adjustOnZoom: true,
         animation :{
             enabled: false
@@ -454,7 +484,7 @@ function drawQueueChart(){
         argumentAxis : {
             hoverMode: 'allArgumentPoints',
             axisDivisionFactor : 20,
-            max : simConfig.users / simConfig.targetRate + 60,
+        //    max : simConfig.users / simConfig.targetRate + 60,
             min: 0,
             title : {
                 text : "Time (sec)"
@@ -518,14 +548,14 @@ function drawQueueChart(){
 
 function drawRateChart(){
     $("#ratesChart").dxChart({
-        dataSource: [],
-        adjustOnZoom: false,
+        dataSource: [{ time: 0, started: 0, finished: 0}],
+        adjustOnZoom: true,
         animation :{
             enabled: false
         },
         argumentAxis : {
             axisDivisionFactor : 20,
-            max : simConfig.users / simConfig.targetRate + 60,
+           // max : simConfig.users / simConfig.targetRate + 60,
             min : 0,
             title : {
                 text : "Time (sec)"
@@ -533,7 +563,7 @@ function drawRateChart(){
         },
         valueAxis : {
             axisDivisionFactor : 20,
-            max : simConfig.users + 0.2*simConfig.users,
+           // max : simConfig.users + 0.2*simConfig.users,
             min : 0,
             title : {
                 text : "Number of Requests"

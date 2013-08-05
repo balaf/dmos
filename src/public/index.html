@@ -73,7 +73,7 @@
                                 <div class="form-group">
                                     <label for="serverAddress" class="col-lg-4 control-label">DLS Address</label>
                                     <div class="col-lg-8">
-                                        <input type="text" class="form-control input-small" id="serverAddress" placeholder="Example: 10.11.1.152" data-bind="value: config().serverAddress">
+                                        <input type="text" class="form-control input-small" id="serverAddress" placeholder="Example: 10.11.1.152" data-bind="value: config.serverAddress">
                                         <span class="help-block">The IP address (or hostname) of the DLS server. This must not include port number or protocol (e.g. http/https)</span>
                                     </div>
                                 </div>
@@ -82,7 +82,7 @@
                                 <div class="form-group">
                                     <label for="mac" class="col-lg-4 control-label">MAC Address</label>
                                     <div class="col-lg-8">
-                                        <input type="text" class="form-control input-small" id="mac" placeholder="Example: 302108189656" data-bind="value: config().mac">
+                                        <input type="text" class="form-control input-small" id="mac" placeholder="Example: 302108189656" data-bind="value: config.mac">
                                         <span class="help-block">The MAC address of the first mobility enabled device</span>
                                     </div>
                                 </div>
@@ -92,7 +92,7 @@
                                 <div class="form-group">
                                     <label for="e164" class="col-lg-4 control-label">User E164</label>
                                     <div class="col-lg-8">
-                                        <input type="text" class="form-control input-small" id="e164" placeholder="Example: 302108189656" data-bind="value: config().e164">
+                                        <input type="text" class="form-control input-small" id="e164" placeholder="Example: 302108189656" data-bind="value: config.e164">
                                         <span class="help-block">The E164 number of the first mobile user</span>
                                     </div>
                                 </div>
@@ -101,7 +101,7 @@
                                 <div class="form-group">
                                     <label for="be164" class="col-lg-4 control-label">Basic E164</label>
                                     <div class="col-lg-8">
-                                        <input type="text" class="form-control input-small" id="be164" placeholder="Example: 302108189656" data-bind="value: config().be164">
+                                        <input type="text" class="form-control input-small" id="be164" placeholder="Example: 302108189656" data-bind="value: config.be164">
                                         <span class="help-block">The Basic E164 number of the first mobility enabled device</span>
                                     </div>
                                 </div>
@@ -110,8 +110,8 @@
                                 <div class="form-group">
                                     <label for="action" class="col-lg-4 control-label">Simulation Scenario</label>
                                     <div class="col-lg-8">
-                                       <!--  <input type="text" class="form-control input-small" id="action" placeholder="Example: logon" data-bind="value: config().action"> -->
-                                        <select class="form-control" data-bind="value: config().action">
+                                       <!--  <input type="text" class="form-control input-small" id="action" placeholder="Example: logon" data-bind="value: config.action"> -->
+                                        <select class="form-control" data-bind="value: config.action">
                                             <option value="logon">Log On</option>
                                             <option value="startup">Start</option>
                                             <option value="logoff">Log off</option>
@@ -123,7 +123,7 @@
                                 <div class="form-group">
                                     <label for="users" class="col-lg-4 control-label">Number of Users</label>
                                     <div class="col-lg-8">
-                                        <input type="text" class="form-control input-small" id="users" placeholder="Example: 10000" data-bind="value: config().users">
+                                        <input type="text" class="form-control input-small" id="users" placeholder="Example: 10000" data-bind="value: config.users">
                                         <span class="help-block">The total number of request that the simulator will send to DLS</span>
                                     </div>
                                 </div>
@@ -132,7 +132,7 @@
                                 <div class="form-group">
                                     <label for="targetRate" class="col-lg-4 control-label">Request Rate (per second)</label>
                                     <div class="col-lg-8">
-                                        <input type="text" class="form-control input-small" id="targetRate" placeholder="Example: 10000" data-bind="value: config().targetRate">
+                                        <input type="text" class="form-control input-small" id="targetRate" placeholder="Example: 10000" data-bind="value: config.targetRate">
                                         <span class="help-block">The number of requests pre second that the simulator will send to DLS</span>
                                     </div>
                                 </div>

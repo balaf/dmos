@@ -67,7 +67,6 @@ module.exports.start = function(config){
             clearInterval(interval);
             simStatus.status = "allSent";
         }
-        log.debug("%s startedOne finished", currentDevice.mac);
     }
 
     function endOne(currentDevice){
@@ -192,8 +191,8 @@ module.exports.setConfig = function (data) {
 };
 
 module.exports.setFailed = function(){
-    out.info("Failed:", simStats.failed)
     simStats.failed++;
+    out.info("Failed:", simStats.failed)
 };
 
 module.exports.getSimConfig = function() {

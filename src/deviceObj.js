@@ -42,6 +42,5 @@ function init(obj){
     obj.on("ReadAllItemsDone", route);
     obj.on("CleanUp", route);
     obj.on("CleanUpDone", route);
-    obj.on("logoff", route);
     obj.on("Overload", route);
 }
