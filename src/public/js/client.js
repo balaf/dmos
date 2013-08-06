@@ -39,8 +39,6 @@ var simConfig = {
     targetRate: 1 //(users/sec)
 };
 
-//setInterval(function(){ console.log(simConfig.users)},2000);
-
 var simStats = {};
 var simActualConfig = {};
 var simStatus = {
@@ -49,9 +47,7 @@ var simStatus = {
 
 var actualArrivalRate;
 var actualFinishRate;
-var estimatedDuration;
 var currentDuration;
-var progress;
 
 // When the connection is open, send some data to the server
 connection.onopen = function () {
@@ -61,18 +57,6 @@ connection.onopen = function () {
     /// Update DOM on every message from the ws ////
     App.targetArrivalRate(simConfig.targetRate);
     App.targetUsers(simConfig.users);
-
-    /// Update DOM on every message from the ws ////
-    App.actualArrivalRate(roundTo2Decimals(actualArrivalRate));
-    App.actualFinishRate(roundTo2Decimals(actualFinishRate));
-    App.estimatedDuration(estimatedDuration);
-    App.currentDuration(currentDuration);
-    //
-    // App.progress(progress);
-    App.finishedUsers(simStats.finished);
-    App.startedUsers(simStats.started);
-    App.failedUsers(simStats.failed);
-
 };
 
 
@@ -135,25 +119,21 @@ connection.onmessage = function (e) {
         simActualConfig = jsonData.config;
 
         console.log(simStats);
-        console.log(simActualConfig);
+
 
         /// edge cases:
         /// 1. none or only one has yet started
         actualArrivalRate = 0;
         actualFinishRate = 0;
-        estimatedDuration = 0;
         currentDuration = 0;
-        //progress = ((simStats.finished + simStats.failed)/ simActualConfig.users) * 100 || 0;
-        console.log("progress:", progress);
-        /// 1. none or only one has yet finished
 
+        /// 1. none or only one has yet finished
         if (simStats.finished <=1) {
             actualArrivalRate = simStats.started * 1000 / (simStats.lastStarted - simStats.firstStarted);
         }
         else if ((simStats.started > 1) && (simStats.finished > 1)) {
             actualArrivalRate = simStats.started * 1000 / (simStats.lastStarted - simStats.firstStarted);
             actualFinishRate = simStats.finished * 1000 / (simStats.lastFinished - simStats.firstFinished);
-            estimatedDuration = simActualConfig.users/actualFinishRate;
 
             if (simStatus.status === "finished") {
                 currentDuration = (simStats.lastFinished - simStats.startTime)/1000;
@@ -167,14 +147,18 @@ connection.onmessage = function (e) {
         App.targetArrivalRate(simConfig.targetRate);
         App.targetUsers(simConfig.users);
 
+        var displayStartTime = moment(simStats.startTime).startOf('hour').fromNow();
+        App.startTime(displayStartTime);
+        App.endTime(simStats.endTime);
+
         /// Update DOM on every message from the ws ////
         App.actualArrivalRate(roundTo2Decimals(actualArrivalRate));
         App.actualFinishRate(roundTo2Decimals(actualFinishRate));
-        App.estimatedDuration(estimatedDuration);
         App.currentDuration(currentDuration);
         //
-        // App.progress(progress);
+
         App.finishedUsers(simStats.finished);
+        App.overloadedUsers(simStats.overloaded);
         App.startedUsers(simStats.started);
         App.failedUsers(simStats.failed);
 
@@ -205,23 +189,11 @@ connection.onmessage = function (e) {
             tmpCountChartData[i] = { id: i, sent: sent, completed: finished}
             index++;
         }
-        console.log('Obj:', tmpCountChartData)
+
         App.queueChartData.push(tmpQueueChartData);
         App.rateChartData.push(tmpRateChartData);
         App.countChartData(tmpCountChartData);
         App.histoChartData(tmpHistoChartData);
-
-     /*   console.log("actualArrivalRate:", actualArrivalRate);
-        console.log("actualFinishRate:", actualFinishRate);
-        console.log("estimatedDuration:", estimatedDuration);
-        console.log("currentDuration:", currentDuration);
-        console.log("progress: %s %", progress);*/
-
-/*        console.log("Green:", App.progressGreen());
-        console.log("Success:", App.finishedUsers());
-        console.log("Red:", App.progressRed());
-        console.log("F:", App.failedUsers());
-        console.log("Target:", App.targetUsers());*/
     }
 }
 
@@ -236,7 +208,10 @@ function AppViewModel() {
     this.startedUsers = ko.observable(0);
     this.currentDuration = ko.observable(0);
     this.finishedUsers = ko.observable(0);
+    this.overloadedUsers = ko.observable(0);
     this.failedUsers = ko.observable(0);
+    this.startTime = ko.observable(0);
+    this.endTime = ko.observable(new Date());
     this.progressGreen = ko.computed(function(){
         return "width:" + roundTo2Decimals(-15+this.finishedUsers()*100/this.targetUsers()) +'%;';
     },this);
@@ -244,8 +219,7 @@ function AppViewModel() {
         return "width:" + roundTo2Decimals(15+this.failedUsers()*100/this.targetUsers()) +'%;';
     },this);
 
-    //this.progress = ko.observable(0);
-    this.estimatedDuration = ko.observable(0);
+ ;
     this.queueChartData = ko.observableArray();
     this.rateChartData = ko.observableArray();
     this.countChartData = ko.observableArray();
@@ -290,7 +264,7 @@ function AppViewModel() {
     }, this);
 
     this.progressDisplay = ko.computed(function() {
-        return roundTo2Decimals((this.finishedUsers()+this.failedUsers())/this.targetUsers()/100) + "%";
+        return roundTo2Decimals((100*(this.finishedUsers()+this.failedUsers()))/this.targetUsers()) + "%";
     }, this);
 
     this.queueValueAxis = ko.computed(function(){
@@ -348,22 +322,6 @@ var App = new AppViewModel();
 ko.applyBindings(App);
 
 $(document).ready(function () {
-    /*$("#saveBt").click(function(){
-        simConfig.serverAddress = $("#serverAddress").val();
-        simConfig.mac = $("#mac").val()
-        simConfig.e164 = $("#e164").val();
-        simConfig.be164 = $("#be164").val();
-        simConfig.action = $("#action").val();
-        simConfig.users = $("#users").val();
-        simConfig.targetRate = $("#targetRate").val();
-        // The new configuration will be send to the server when the simulation starts
-    });*/
-
-   /* $("#cancelBt").click(function(){
-        //console.log(simConfig);
-        //App.config(simConfig);
-    });*/
-
     $("#start").click(function () {
         //drawQueueChart();
         //drawRateChart();
@@ -384,7 +342,7 @@ $(document).ready(function () {
 
 
         connection.send(JSON.stringify(message));
-        console.log(JSON.stringify(message));
+        console.log("Sent to server:",message);
         $('#start').attr('disabled', 'disabled');
         progress = 0;
 
@@ -394,7 +352,7 @@ $(document).ready(function () {
         message.action = "stop";
 
         connection.send(JSON.stringify(message));
-        console.log(message);
+        console.log("Sent to server",message);
         $('#stop').attr('disabled', 'disabled');
 
     });

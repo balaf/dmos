@@ -13,11 +13,8 @@
                     <h1 id="overview">OpenScape DLS Simulator</h1>
                     <a href="#myModal" data-toggle="modal"  id="conf" class="btn btn-info pull-right">Configuration</a>
                 </div>
+
                 <div class="row">
-                    <div class="col-3 col-lg-3">
-                        <h4>Target Arrival Rate:  <span class="rate" data-bind="text: targetArrivalRate"></span> </h4>
-                    </div>
-                </div>
                     <div class="col-lg-5 col-offset-1">
                         <h5 class="center">Arrivals/Completion:  <span class="rate" data-bind="text: arrivalVsCompletion"></span></h5>
                         <div id="ratesChart" class="chart" data-bind="dxChart: {dataSource: rateChartData, argumentAxis: argAxis, valueAxis: rateValueAxis}"></div>
@@ -28,22 +25,73 @@
                         <div id="queueChart" class="chart" data-bind="dxChart: {dataSource: queueChartData, argumentAxis: argAxis, valueAxis: queueValueAxis}"></div>
                         <div class="text">View the number of requests that have arrived in DLS but are not yet finished</div>
                     </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-4 ">
+                        <table class="table table-striped">
+                            <caption> Request Rates</caption>
+                            <tr>
+                                <th>Target Request Rate</th>
+                                <td data-bind="text: targetArrivalRate"></td>
+                            </tr>
+                            <tr>
+                                <th>Actual Request Rate</th>
+                                <td data-bind="text: actualArrivalRate"></td>
+                            </tr>
+                            <tr>
+                                <th>Request Completion Rate</th>
+                                <td data-bind="text: actualFinishRate"></td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="col-lg-4 ">
+                        <table class="table table-striped">
+                            <caption> Progress</caption>
+                            <tr>
+                                <th>Request Started:</th>
+                                <td data-bind="text: startedUsers"></td>
+                            </tr>
+                            <tr>
+                                <th>Successfully Finished</th>
+                                <td data-bind="text: finishedUsers"></td>
+                            </tr>
+                            <tr>
+                                <th>Failed</th>
+                                <td data-bind="text: failedUsers"></td>
+                            </tr>
+                            <tr>
+                                <th>Overload Responses</th>
+                                <td data-bind="text: overloadedUsers"></td>
+                            </tr>
+                        </table>
+                    </div>
+
+
+                    <div class="col-lg-4 ">
+                        <table class="table table-striped">
+                            <caption> Start/End Time</caption>
+                            <tr>
+                                <th>Start Time</th>
+                                <td data-bind="text: startTime"></td>
+                            </tr>
+                            <tr>
+                                <th>End Time</th>
+                                <td data-bind="text: endTime"></td>
+                            </tr>
+                            <tr>
+                                <th>Duration (sec)</th>
+                                <td data-bind="text: currentDuration"></td>
+                            </tr>
+                        </table>
+                    </div>
+
+                </div>
+
 
 
                 <div class="row">
-                    <div class="col-lg-5 col-offset-1">
-                        <h5 class="center">Individual Requests</h5>
-                        <div id="countChart" class="chart" data-bind="dxChart: {dataSource: countChartData}"></div>
-                        <div class="text">View the number of requests sent/completed per device</div>
-                    </div>
-                    <div class="col-lg-5">
-                        <h5 class="center">Histogram</h5>
-                        <div id="histoChart" class="chart" data-bind="dxChart: {dataSource: histoChartData}"></div>
-                        <div class="text">View the total request completion time per device</div>
-                    </div>
-                </div>
-
-                 <div class="row">
                     <div class="col-lg-10 col-offset-1">
                         <button type="button" id="start" class="btn btn-success btn-large master pull-right">Start!</button>
                         <button type="button" id="stop" class="btn btn-danger btn-large slave pull-left">Stop!</button>                </div>
@@ -75,6 +123,20 @@
                             <h4 class="modal-title">Simulation Results</h4>
                         </div>
                         <div class="modal-body">
+                            <div class="row">
+                                <div class="col-lg-5 col-offset-1">
+                                    <h5 class="center">Individual Requests</h5>
+                                    <div id="countChart" class="chart" data-bind="dxChart: {dataSource: countChartData}"></div>
+                                    <div class="text">View the number of requests sent/completed per device</div>
+                                </div>
+                                <div class="col-lg-5">
+                                    <h5 class="center">Histogram</h5>
+                                    <div id="histoChart" class="chart" data-bind="dxChart: {dataSource: histoChartData}"></div>
+                                    <div class="text">View the total request completion time per device</div>
+                                </div>
+                            </div>
+
+
                         </div>
                         <div class="modal-footer">
                             <a href="#" data-dismiss="modal" class="btn btn-default">Close</a>
@@ -89,81 +151,144 @@
             <div class="modal fade" id="myModal" data-backdrop="static">
                 <div class="modal-dialog myModal">
                     <div class="modal-content">
-                        <div class="modal-header">
-                            <h4 class="modal-title">Simulation Configuration</h4>
-                        </div>
                         <div class="modal-body">
-                            <form class="form-horizontal">
-                                <!--  DLS Address -->
-                                <div class="form-group">
-                                    <label for="serverAddress" class="col-lg-4 control-label">DLS Address</label>
-                                    <div class="col-lg-8">
-                                        <input type="text" class="form-control input-small" id="serverAddress" placeholder="Example: 10.11.1.152" data-bind="value: config.serverAddress">
-                                        <span class="help-block">The IP address (or hostname) of the DLS server. This must not include port number or protocol (e.g. http/https)</span>
-                                    </div>
+                            <ul id="confTab" class="nav nav-tabs">
+                                <li class="active">
+                                    <a data-toggle="tab" href="#confSimulation">Simulation</a>
+                                </li>
+                                <li>
+                                    <a data-toggle="tab" href="#confDLS">DLS</a>
+                                </li>
+                                <li class="disabled">
+                                    <a data-toggle="tab" href="#conMobility">Mobility Data</a>
+                                </li>
+                                <li class="disabled">
+                                    <a data-toggle="tab" href="#confDelays">Delays</a>
+                                </li>
+                            </ul>
+                            <div id="myTabContent" class="tab-content">
+                                <div id="confSimulation" class="tab-pane fade active in">
+                                    <form class="form-horizontal">
+                                        <!--  Scenario -->
+                                        <div class="form-group">
+                                            <label for="action" class="col-lg-4 control-label">Simulation Scenario</label>
+                                            <div class="col-lg-6">
+                                                <!--  <input type="text" class="form-control input-small" id="action" placeholder="Example: logon" data-bind="value: config().action"> -->
+                                                <select id="action" class="form-control" data-bind="value: config.action">
+                                                    <option value="logon">Log On</option>
+                                                    <option value="startup">Start</option>
+                                                    <option value="logoff">Log off</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <!--  Users -->
+                                        <div class="form-group">
+                                            <label for="users" class="col-lg-4 control-label">Number of Users</label>
+                                            <div class="col-lg-6">
+                                                <input type="text" class="form-control input-small" id="users" placeholder="Example: 10000" data-bind="value: config.users">
+                                                <span class="help-block">The total number of request that the simulator will send to DLS</span>
+                                            </div>
+                                        </div>
+
+                                        <!--  Rate -->
+                                        <div class="form-group">
+                                            <label for="targetRate" class="col-lg-4 control-label">Request Rate (per second)</label>
+                                            <div class="col-lg-6">
+                                                <input type="text" class="form-control input-small" id="targetRate" placeholder="Example: 10000" data-bind="value: config.targetRate">
+                                                <span class="help-block">The number of requests pre second that the simulator will send to DLS</span>
+                                            </div>
+                                        </div>
+                                    </form>
                                 </div>
+                                <div id="confDLS" class="tab-pane fade">
+                                    <form class="form-horizontal">
+                                        <!--  DLS Address -->
+                                        <div class="form-group">
+                                            <label for="serverAddress" class="col-lg-4 control-label">DLS Address</label>
+                                            <div class="col-lg-6">
+                                                <input type="text" class="form-control input-small" id="serverAddress" placeholder="Example: 10.11.1.152" data-bind="value: config.serverAddress">
+                                                <span class="help-block">The IP address (or hostname) of the DLS server. This must not include port number or protocol (e.g. http/https)</span>
+                                            </div>
+                                        </div>
 
-                                <!--  Mobile User Numner -->
-                                <div class="form-group">
-                                    <label for="mac" class="col-lg-4 control-label">MAC Address</label>
-                                    <div class="col-lg-8">
-                                        <input type="text" class="form-control input-small" id="mac" placeholder="Example: 302108189656" data-bind="value: config.mac">
-                                        <span class="help-block">The MAC address of the first mobility enabled device</span>
-                                    </div>
+                                        <!--  Mobile User Numner -->
+                                        <div class="form-group">
+                                            <label for="mac" class="col-lg-4 control-label">MAC Address</label>
+                                            <div class="col-lg-6">
+                                                <input type="text" class="form-control input-sm" id="mac" placeholder="Example: 302108189656" data-bind="value: config.mac">
+                                                <span class="help-block">The MAC address of the first mobility enabled device</span>
+                                            </div>
+                                        </div>
+                                        <!--  Mobile User Numner -->
+                                        <div class="form-group">
+                                            <label for="e164" class="col-lg-4 control-label">User E164</label>
+                                            <div class="col-lg-6">
+                                                <input type="text" class="form-control input-small" id="e164" placeholder="Example: 302108189656" data-bind="value: config.e164">
+                                                <span class="help-block">The E164 number of the first mobile user</span>
+                                            </div>
+                                        </div>
+                                        <!--  Basic Device Number -->
+                                        <div class="form-group">
+                                            <label for="be164" class="col-lg-4 control-label">Basic E164</label>
+                                            <div class="col-lg-6">
+                                                <input type="text" class="form-control input-small" id="be164" placeholder="Example: 302108189656" data-bind="value: config.be164">
+                                                <span class="help-block">The Basic E164 number of the first mobility enabled device</span>
+                                            </div>
+                                        </div>
+                                    </form>
                                 </div>
-
-
-                                <!--  Mobile User Numner -->
-                                <div class="form-group">
-                                    <label for="e164" class="col-lg-4 control-label">User E164</label>
-                                    <div class="col-lg-8">
-                                        <input type="text" class="form-control input-small" id="e164" placeholder="Example: 302108189656" data-bind="value: config.e164">
-                                        <span class="help-block">The E164 number of the first mobile user</span>
-                                    </div>
+                                <div id="conMobility" class="tab-pane fade">
+                                    <form class="form-horizontal">
+                                    </form>
                                 </div>
+                                <div id="confDelays" class="tab-pane fade">
+                                    <form class="form-horizontal">
+                                        <!--  Write Items -->
+                                        <div class="form-group">
+                                            <label for="writeItems" class="col-lg-4 control-label">WriteItems (sec)</label>
+                                            <div class="col-lg-7">
+                                                <input type="text" class="form-control input-small" id="writeItems" placeholder="Example: 10" data-bind="value: config.serverAddress">
+                                                <span class="help-block">The number of seconds that the simulator will wait before replying to a WriteItems request</span>
+                                            </div>
+                                        </div>
+                                        <!--  Read Items -->
+                                        <div class="form-group">
+                                            <label for="readItems" class="col-lg-4 control-label">ReadItems (sec)</label>
+                                            <div class="col-lg-7">
+                                                <input type="text" class="form-control input-small" id="readItems" placeholder="Example: 10" data-bind="value: config.serverAddress">
+                                                <span class="help-block">The number of seconds that the simulator will wait before replying to a ReadItems request</span>
+                                            </div>
+                                        </div>
+                                        <!--  ReadAll Items -->
+                                        <div class="form-group">
+                                            <label for="readAllItems" class="col-lg-4 control-label">ReadAllItems (sec)</label>
+                                            <div class="col-lg-7">
+                                                <input type="text" class="form-control input-small" id="readAllItems" placeholder="Example: 10" data-bind="value: config.serverAddress">
+                                                <span class="help-block">The number of seconds that the simulator will wait before replying to a ReadAllItems request</span>
+                                            </div>
+                                        </div>
+                                        <!--  Overload Min -->
+                                        <div class="form-group">
+                                            <label for="overloadMin" class="col-lg-4 control-label">Min Overload (sec)</label>
+                                            <div class="col-lg-7">
+                                                <input type="text" class="form-control input-small" id="overloadMin" placeholder="Example: 10" data-bind="value: config.serverAddress">
+                                                <span class="help-block">The min number of seconds that the simulator will wait before repeating a request that was initially cleaned-up by DLS with 'overload' reason</span>
+                                            </div>
+                                        </div>
+                                        <!--  Overload Max -->
+                                        <div class="form-group">
+                                            <label for="overloadMax" class="col-lg-4 control-label">Min Overload (sec)</label>
+                                            <div class="col-lg-7">
+                                                <input type="text" class="form-control input-small" id="overloadMax" placeholder="Example: 10" data-bind="value: config.serverAddress">
+                                                <span class="help-block">The max number of seconds that the simulator will wait before repeating a request that was initially cleaned-up by DLS with 'overload' reason</span>
+                                            </div>
+                                        </div>
 
-                                <!--  Basic Device Number -->
-                                <div class="form-group">
-                                    <label for="be164" class="col-lg-4 control-label">Basic E164</label>
-                                    <div class="col-lg-8">
-                                        <input type="text" class="form-control input-small" id="be164" placeholder="Example: 302108189656" data-bind="value: config.be164">
-                                        <span class="help-block">The Basic E164 number of the first mobility enabled device</span>
-                                    </div>
+                                    </form>
                                 </div>
+                            </div>
 
-                                <!--  Scenario -->
-                                <div class="form-group">
-                                    <label for="action" class="col-lg-4 control-label">Simulation Scenario</label>
-                                    <div class="col-lg-8">
-                                       <!--  <input type="text" class="form-control input-small" id="action" placeholder="Example: logon" data-bind="value: config().action"> -->
-                                        <select id="action" class="form-control" data-bind="value: config.action">
-                                            <option value="logon">Log On</option>
-                                            <option value="startup">Start</option>
-                                            <option value="logoff">Log off</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <!--  Users -->
-                                <div class="form-group">
-                                    <label for="users" class="col-lg-4 control-label">Number of Users</label>
-                                    <div class="col-lg-8">
-                                        <input type="text" class="form-control input-small" id="users" placeholder="Example: 10000" data-bind="value: config.users">
-                                        <span class="help-block">The total number of request that the simulator will send to DLS</span>
-                                    </div>
-                                </div>
-
-                                <!--  Rate -->
-                                <div class="form-group">
-                                    <label for="targetRate" class="col-lg-4 control-label">Request Rate (per second)</label>
-                                    <div class="col-lg-8">
-                                        <input type="text" class="form-control input-small" id="targetRate" placeholder="Example: 10000" data-bind="value: config.targetRate">
-                                        <span class="help-block">The number of requests pre second that the simulator will send to DLS</span>
-                                    </div>
-                                </div>
-
-
-                            </form>
                         </div>
                         <div class="modal-footer">
                             <a href="#" data-dismiss="modal" data-bind="click: cancelConfig" id="cancelBt" class="btn btn-default pull-left">Cancel</a>
@@ -174,13 +299,13 @@
             </div><!-- /.modal -->
 
 
-
         </body>
         <script src="js/jquery-2.0.3.min.js"></script>
         <script src="js/bootstrap.min.js"></script>
         <script src="js/knockout-2.3.0.js"></script>
         <script src="js/globalize.min.js"></script>
         <script src="js/dx.chartjs.js"></script>
+        <script src="js/moment.min.js"></script>
 <!--
         <script src="js/app.js"></script>
 -->

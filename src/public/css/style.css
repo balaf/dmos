@@ -79,14 +79,29 @@
 
 /* modal settings */
 .myModal {
-    width: 700px
+    width: 700px;
+    margin-left: -350px;
 }
 
 .resultsModal {
- /*   width: 800px;*/
+    width: 1000px;
+    margin-left: -500px;
 
 }
 .help-block{
     font-size: 10px;
+}
+
+
+.form-horizontal {
+    padding-top: 20px;
+}
+
+.modal-body {
+    padding-bottom: 0px;
+}
+
+.modal-footer {
+    margin-top: 0px;
 }
 
