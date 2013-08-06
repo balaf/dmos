@@ -56,7 +56,23 @@ var progress;
 // When the connection is open, send some data to the server
 connection.onopen = function () {
     connection.send('{"action" : "ping"}'); // Send the message 'Ping' to the server
+
+
+    /// Update DOM on every message from the ws ////
     App.targetArrivalRate(simConfig.targetRate);
+    App.targetUsers(simConfig.users);
+
+    /// Update DOM on every message from the ws ////
+    App.actualArrivalRate(roundTo2Decimals(actualArrivalRate));
+    App.actualFinishRate(roundTo2Decimals(actualFinishRate));
+    App.estimatedDuration(estimatedDuration);
+    App.currentDuration(currentDuration);
+    //
+    // App.progress(progress);
+    App.finishedUsers(simStats.finished);
+    App.startedUsers(simStats.started);
+    App.failedUsers(simStats.failed);
+
 };
 
 
@@ -67,6 +83,8 @@ connection.onerror = function (error) {
 
 // Log messages from the server
 connection.onmessage = function (e) {
+
+
 
     var jsonData;
     try {
@@ -114,7 +132,7 @@ connection.onmessage = function (e) {
         actualFinishRate = 0;
         estimatedDuration = 0;
         currentDuration = 0;
-        progress = ((simStats.finished + simStats.failed)/ simActualConfig.users) * 100 || 0;
+        //progress = ((simStats.finished + simStats.failed)/ simActualConfig.users) * 100 || 0;
         console.log("progress:", progress);
         /// 1. none or only one has yet finished
 
@@ -143,9 +161,11 @@ connection.onmessage = function (e) {
         App.actualFinishRate(roundTo2Decimals(actualFinishRate));
         App.estimatedDuration(estimatedDuration);
         App.currentDuration(currentDuration);
-        App.progress(progress);
+        //
+        // App.progress(progress);
         App.finishedUsers(simStats.finished);
         App.startedUsers(simStats.started);
+        App.failedUsers(simStats.failed);
 
         // Update Queue Chart
         var tmpQueueChartData = { time: (simStats.now - simStats.startTime)/1000,
@@ -154,60 +174,33 @@ connection.onmessage = function (e) {
         var tmpRateChartData = { time: (simStats.now - simStats.startTime)/1000,
             started: simStats.started,
             finished: simStats.finished};
+
+        var tmpCountChartData = [];
+        var tmpHistoChartData = []
+        console.log("Device length ", simStats.histogram.length);
+        for (var i=0; i<simStats.histogram.length; i++){
+            //tmpCountChartData[i] = { id: i, count: simStats.devices[i].count.sent, completed: simStats.devices[i].count.finished}
+            tmpHistoChartData[i] = { id: i, time: simStats.histogram[i]}
+        }
+        console.log('Obj:', tmpHistoChartData)
         App.queueChartData.push(tmpQueueChartData);
         App.rateChartData.push(tmpRateChartData);
+        App.countChartData.push(tmpCountChartData);
+        App.histoChartData.push(tmpHistoChartData);
 
      /*   console.log("actualArrivalRate:", actualArrivalRate);
         console.log("actualFinishRate:", actualFinishRate);
         console.log("estimatedDuration:", estimatedDuration);
         console.log("currentDuration:", currentDuration);
         console.log("progress: %s %", progress);*/
+
+/*        console.log("Green:", App.progressGreen());
+        console.log("Success:", App.finishedUsers());
+        console.log("Red:", App.progressRed());
+        console.log("F:", App.failedUsers());
+        console.log("Target:", App.targetUsers());*/
     }
-
-    function calculateStats(devices){
-        /// calculate min/max/mean
-        var min = 100000; //(sec)
-        var result = {
-            max : 0,
-            mean: 0,
-            min: 0,
-            variance: 0
-        };
-        var max = 0; //(sec)
-        var mean;
-        var variance = 0;
-        var i;
-        var currentDevice;
-
-        var totalDuration = 0;
-        var finishedDevices = 0;
-
-        for (i=0;i<devices.length;i++) {
-            currentDevice = devices[i];
-            if (currentDevice.finished) {
-                finishedDevices ++;
-                currentDevice.duration = currentDevice.endTime - currentDevice.startTime;
-                if (currentDevice.duration < min) {
-                    min = currentDevice.duration;
-                }
-                if (currentDevice.duration > max) {
-                    max = currentDevice.duration;
-                }
-                totalDuration += currentDevice.duration;
-            }
-        }
-        mean = (totalDuration/finishedDevices);
-
-        for (i=0;i<finishedDevices;i++){
-            variance += Math.pow((currentDevice.duration - mean),2)
-        }
-        result.min = Math.round(min/10)/100;
-        result.max = Math.round(max/10)/100;
-        result.mean = Math.round(mean/10)/100;
-
-        return result;
-    }
-};
+}
 
 
 ///////////////  Simulator GUI Model ///////////////
@@ -218,12 +211,23 @@ function AppViewModel() {
     this.actualFinishRate = ko.observable(0);
     this.targetUsers = ko.observable(simConfig.users);
     this.startedUsers = ko.observable(0);
-    this.finishedUsers = ko.observable(0);
     this.currentDuration = ko.observable(0);
-    this.progress = ko.observable(0);
+    this.finishedUsers = ko.observable(0);
+    this.failedUsers = ko.observable(0);
+    this.progressGreen = ko.computed(function(){
+        return "width:" + roundTo2Decimals(-15+this.finishedUsers()*100/this.targetUsers()) +'%;';
+    },this);
+    this.progressRed = ko.computed(function(){
+        return "width:" + roundTo2Decimals(15+this.failedUsers()*100/this.targetUsers()) +'%;';
+    },this);
+
+    //this.progress = ko.observable(0);
     this.estimatedDuration = ko.observable(0);
     this.queueChartData = ko.observableArray();
     this.rateChartData = ko.observableArray();
+    this.countChartData = ko.observableArray();
+    this.histoChartData = ko.observableArray();
+
     this.config = {
             serverAddress : ko.protectedObservable(simConfig.serverAddress),
             mac : ko.protectedObservable(simConfig.mac),
@@ -233,19 +237,13 @@ function AppViewModel() {
             users: ko.protectedObservable(simConfig.users),
             targetRate: ko.protectedObservable(simConfig.targetRate) //(users/sec)
         };
-   /* this.targetArrivalRate = ko.computed(function(){
-          return this.config().targetRate();
-    },this)
-
-    this.targetUsers = ko.computed(function(){
-        return this.config().users();
-    },this)
-*/
     this.deviceStats = ko.observableArray(simStats.devices);
 
     this.saveConfig = function() {
         for (var key in this.config) {
             this.config[key].commit();
+            this.targetArrivalRate(this.config['targetRate']());
+            this.targetUsers(this.config['users']());
             simConfig[key] = this.config[key]();
         }
     };
@@ -255,9 +253,6 @@ function AppViewModel() {
             simConfig[key] = this.config[key]();
         }
     };
-
-
-
     this.arrivalVsCompletion = ko.computed(function(){
         var result;
         if (this.actualFinishRate() == 0) {
@@ -271,28 +266,8 @@ function AppViewModel() {
         return this.startedUsers() - this.finishedUsers();
     }, this);
 
-    this.needleActual = ko.computed(function(){
-        return [{ value: this.actualArrivalRate()}];
-    }, this);
-
-    this.markerActual = ko.computed(function(){
-        return [{ value: this.actualArrivalRate()}];
-    }, this);
-
-    this.needleFinished = ko.computed(function(){
-        return [{ value: this.actualFinishRate()}];
-    }, this);
-
-    this.markerFinished = ko.computed(function(){
-        return [{ value: this.actualFinishRate()}];
-    }, this);
-
     this.progressDisplay = ko.computed(function() {
-        return roundTo2Decimals(this.progress()) + "%";
-    }, this);
-
-    this.barWidth = ko.computed(function() {
-        return "width:" + this.progress() + "%";
+        return roundTo2Decimals((this.finishedUsers()+this.failedUsers())/this.targetUsers()/100) + "%";
     }, this);
 
     this.queueValueAxis = ko.computed(function(){
@@ -322,10 +297,6 @@ function AppViewModel() {
                 size: 11
             }
         }
-       // console.log("target users:", this.targetUsers()) ;
-        console.log('Config:',simConfig);
-        console.log('ActualConfig:',simActualConfig);
-        console.log('Axis',axis.max);
         return axis;
 
     },this);
@@ -345,6 +316,21 @@ function AppViewModel() {
           }
       }
       return axis;
+    },this);
+    this.argAxis2 = ko.computed(function(){
+        var axis = {
+            hoverMode: 'allArgumentPoints',
+            axisDivisionFactor : 20,
+            max : this.targetUsers(),
+            min: 0,
+            title : {
+                text : "Devices"
+            },
+            font : {
+                size: 11
+            }
+        }
+        return axis;
     },this);
 }
 
@@ -379,6 +365,8 @@ $(document).ready(function () {
         // clean up charts
         App.queueChartData.removeAll();
         App.rateChartData.removeAll();
+        App.countChartData.removeAll();
+        App.histoChartData.removeAll();
 
         var tmpQueueChartData = { time: 0, queue : 0};
 
@@ -403,76 +391,150 @@ $(document).ready(function () {
     });
 
 
-    drawGauges();
     drawRateChart();
     drawQueueChart();
+    drawHistoChart();
+    drawCountChart();
 });
 
 function roundTo2Decimals(numberToRound) {
     return Math.round(numberToRound * 100) / 100
 }
 
-function drawGauges(){
-    $(".gauge").dxCircularGauge({
-        commonNeedleSettings: {
-            offset: 0,
-            type: "triangle"
-        },
-        commonRangeBarSettings: {
-            size: 50,
-            offset:1,
-            text: {
-                font: {
-                    size: 6
-                }
-            }
-        },
-        scale: {
-            label: {
-                indentFromTick : 2,
-                font: {
-                    color: "#442211",
-                    size: 6
-                }
-            },
-            startValue: 0,
-            endValue: 10,
-            majorTick: {
-                showCalculatedTicks: false,
-                customTickValues: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-            },
-            label : {
-                font :{
-                    size:11
-                }
-            }
-        },
-        rangeContainer: {
-            backgroundColor: "none",
-            ranges: [{
-                startValue: 0,
-                endValue: 2,
-                color: 'lightgreen'
-            }, {
-                startValue: 2.2,
-                endValue: 5,
-                color: 'yellow'
-            }, {
-                startValue: 5.2,
-                endValue: 8,
-                color: 'orange'
-            }, {
-                startValue: 8.2,
-                endValue: 10,
-                color: 'red'
-            }]
 
+function drawCountChart(){
+    $("#countChart").dxChart({
+        dataSource: [{ time: 0, sent: 0, completed: 0}],
+        adjustOnZoom: true,
+        animation :{
+            enabled: false
         },
-        markers: [{ value: simStats.targetArrivalRate }],
-        needles: [{ value: simStats.targetArrivalRate }]
+        argumentAxis : {
+            hoverMode: 'allArgumentPoints',
+            axisDivisionFactor : 20,
+            max : simConfig.users,
+            min: 0,
+            title : {
+                text : "Devices"
+            },
+            font : {
+                size: 11
+            }
+        },
+        valueAxis : {
+            axisDivisionFactor : 20,
+            max : 8,
+            min: 0,
+            title : {
+                text : "requests sent/finished"
+            },
+            font : {
+                size: 11
+            }
+        },
+        commonAxisSettings: {
+            visible: true,
+            color: 'black',
+            width: 2,
+            grid: {visible:true}
+        },
+        commonSeriesSettings: {
+            border:{
+                visible: true
+            },
+            argumentField: 'time',
+            line: {
+                hoverStyle: {
+                    width: 3
+                }
+            },
+            hoverMode: 'allArgumentPoints',
+            point: {
+                size: 2,
+                hoverStyle: {
+                    width: 2
+                }
+            },
+            type: "steparea",
+            steparea: {
+                border: {
+                    visible: true
+                }
+            }
+        },
+        series: [{name: '',valueField: 'sent'},
+                 {name: '', valueField: 'completed' }],
+        legend: {visible: false}
     });
 }
 
+function drawHistoChart(){
+    $("#histoChart").dxChart({
+        dataSource: [{ time: 0, duration: 0}],
+        adjustOnZoom: true,
+        animation :{
+            enabled: false
+        },
+        argumentAxis : {
+            hoverMode: 'allArgumentPoints',
+            axisDivisionFactor : 20,
+            max : 100,//simConfig.users,
+            min: 0,
+            title : {
+                text : "Devices"
+            },
+            font : {
+                size: 11
+            }
+        },
+        valueAxis : {
+            axisDivisionFactor : 20,
+            //max : (simConfig.users + 0.1*simConfig.users)*0.2,
+            min: 0,
+            title : {
+                text : "time(sec)"
+            },
+            font : {
+                size: 11
+            }
+        },
+        commonAxisSettings: {
+            visible: true,
+            color: 'black',
+            width: 2,
+            grid: {visible:true}
+        },
+        commonSeriesSettings: {
+            border:{
+                visible: true
+            },
+            argumentField: 'id',
+            line: {
+                hoverStyle: {
+                    width: 3
+                }
+            },
+            hoverMode: 'allArgumentPoints',
+            point: {
+                size: 2,
+                hoverStyle: {
+                    width: 2
+                }
+            },
+            type: "steparea",
+            steparea: {
+                border: {
+                    visible: true
+                }
+            }
+        },
+        series: [{
+            name: '',
+            valueField: 'time'
+        }],
+        legend: {visible: false}
+    });
+}
 
 function drawQueueChart(){
     $("#queueChart").dxChart({
@@ -526,23 +588,19 @@ function drawQueueChart(){
                 hoverStyle: {
                     width: 2
                 }
+            },
+            type: "area",
+            area: {
+                border: {
+                    visible: true
+                }
             }
         },
         series: [{
             name: 'Queue Size',
             valueField: 'queue'
         }],
-        legend: {
-            font : {
-                size: 11
-            },
-            paddingLeftRight: 2,
-            paddingTopBottom: 2,
-            markerSize: 10,
-            verticalAlignment: 'bottom',
-            horizontalAlignment: 'right',
-            position: 'inside'
-        }
+        legend: { visible: false}
     });
 }
 
@@ -595,10 +653,12 @@ function drawRateChart(){
         },
         series: [{
             name: 'Requests Started',
-            valueField: 'started'
+            valueField: 'started',
+            color: 'red'
         }, {
             name: 'Requests Completed',
-            valueField: 'finished'
+            valueField: 'finished',
+            color: 'orange'
         }],
         legend: {
             font : {

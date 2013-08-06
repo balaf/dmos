@@ -50,11 +50,13 @@ module.exports.start = function(config){
         log.debug("Emit %s for device %s", simConfig.action, currentDevice.mac)
         currentDevice.emit(simConfig.action, simConfig.action, currentDevice);
 
+        out.debug("Started:", currentDevice.mac);
         simStats.devices[currentDevice.mac] = {};
         simStats.devices[currentDevice.mac].startTime = timeNow;
-        simStats.devices[currentDevice.mac].overflow = 0;
+        simStats.devices[currentDevice.mac].overloaded = 0;
         simStats.devices[currentDevice.mac].progress = "started";
         simStats.devices[currentDevice.mac].wpiTimes = currentDevice.wpiTimes;;
+        simStats.devices[currentDevice.mac].count = currentDevice.count;;
 
         ///////////////////////
         simStats.started ++;
@@ -193,6 +195,19 @@ module.exports.setConfig = function (data) {
 module.exports.setFailed = function(){
     simStats.failed++;
     out.info("Failed:", simStats.failed)
+};
+
+module.exports.setOverloaded = function(mac){
+    if (!simStats.devices[mac]) {
+        out.debug("MAC: ", mac)
+        out.debug(simStats.devices)
+    }
+    if (simStats.devices[mac].overloaded == 0){
+        simStats.overloaded++;
+        simStats.devices[mac].overloaded = 1;
+    };
+
+    out.info("Overloaded:%s, %s", mac, simStats.overloaded)
 };
 
 module.exports.getSimConfig = function() {

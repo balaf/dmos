@@ -1,11 +1,14 @@
 'use strict';
 
 var fsmlog = require(__dirname + '/../../utils/logger').fsmlog;
+var simulator = require(__dirname + '/../../simulator');
 
 
 module.exports = function (device, nextState){
     fsmlog.info("Handler: Overload starting for device %s", device.mac);
     device.wpiTimes[device.wpiTimes.length-1].overload++;
+    out.debug("Set overload for",device.mac)
+    simulator.setOverloaded(device.mac);
     var time = getRandomInt();
     fsmlog.info("Waiting for $s seconds....", time);
 
@@ -83,10 +86,10 @@ module.exports = function (device, nextState){
 
 function getRandomInt (min, max) {
     if (!max) {
-        max = 60;
+        max = 4;
     }
     if (!min) {
-        min = 20;
+        min = 2;
     }
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }

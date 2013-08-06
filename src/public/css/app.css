@@ -1,3 +1,8 @@
+body {
+    color: #8E93A7;
+    background-color: #3a3c3c;
+}
+
 .master{
     width: 58%;
 }
@@ -5,7 +10,17 @@
 .slave{
     width: 38%;
 }
+.form-horizontal {
+    padding-top: 20px;
+}
 
+.modal-body {
+    padding-bottom: 0px;
+}
+
+.modal-footer {
+    margin-top: 0px;
+}
 .page-header {
     border-bottom: 1px solid #EEEEEE;
     margin: 20px 0 10px;
@@ -22,7 +37,7 @@
 .text {
     color: #8E93A7;
     font-size: 11px;
-    margin-bottom: 20px;
+    margin-top: 20px;
     word-wrap: normal;
     width:100%;
     text-align:center;
@@ -68,9 +83,13 @@
     width:100%
 }
 
-.progress {
-    margin: 20px;
+#progressBar{
+    border-radius: 5px;
+    height:100%;
+    background-color: orange;
+
 }
+
 
 /* modal settings */
 .myModal {

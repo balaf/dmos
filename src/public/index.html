@@ -17,21 +17,6 @@
                         <h4>Target Arrival Rate:  <span class="rate" data-bind="text: targetArrivalRate"></span> </h4>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-3 col-lg-3">
-                        <h5 class="center">Actual Arrival Rate:   <span class="rate" data-bind="text: actualArrivalRate"></span> </h5>
-                        <div class="gauge" data-bind="dxCircularGauge: { needles : needleActual, markers: markerActual}"></div>
-                        <div class="text">View the actual number of requests per second sent that the simulator manages to send</div>
-                    </div>
-                    <div class="col-3 col-lg-3">
-                        <h5 class="center">Actual Completion Rate:  <span class="rate" data-bind="text: actualFinishRate"></span></h5>
-                        <div class="gauge" data-bind="dxCircularGauge: { needles : needleFinished, markers: markerFinished}"></div>
-                        <div class="text">View the request completion rate acheived by DLS</div>
-                    </div>
-                    <div class="col-6 col-lg-6">
-                    </div>
-                </div>
-                <div class="row">
                     <div class="col-lg-5 col-offset-1">
                         <h5 class="center">Arrivals/Completion:  <span class="rate" data-bind="text: arrivalVsCompletion"></span></h5>
                         <div id="ratesChart" class="chart" data-bind="dxChart: {dataSource: rateChartData, argumentAxis: argAxis, valueAxis: rateValueAxis}"></div>
@@ -42,21 +27,38 @@
                         <div id="queueChart" class="chart" data-bind="dxChart: {dataSource: queueChartData, argumentAxis: argAxis, valueAxis: queueValueAxis}"></div>
                         <div class="text">View the number of requests that have arrived in DLS but are not yet finished</div>
                     </div>
+
+
+                <div class="row">
+                    <div class="col-lg-5 col-offset-1">
+                        <h5 class="center">Individual Requests</h5>
+                        <div id="countChart" class="chart" data-bind="dxChart: {dataSource: countChartData, argumentAxis: argAxis2}"></div>
+                        <div class="text">View the number of requests sent/completed per device</div>
+                    </div>
+                    <div class="col-lg-5">
+                        <h5 class="center">Histogram</h5>
+                        <div id="histoChart" class="chart" data-bind="dxChart: {dataSource: histoChartData}"></div>
+                        <div class="text">View the total request completion time per device</div>
+                    </div>
                 </div>
 
-                <div id="status">
-                    <div id="progressBar" data-bind="attr: { style: barWidth }"></div>
-                    <div id="statusText">Progress: <span class="simStatus" data-bind="text: progressDisplay"></span></div>
-
-
+                 <div class="row">
+                    <div class="col-lg-10 col-offset-1">
+                        <button type="button" id="start" class="btn btn-success btn-large master pull-right">Start!</button>
+                        <button type="button" id="stop" class="btn btn-danger btn-large slave pull-left">Stop!</button>                </div>
                 </div>
-                <p>
-                    <button type="button" id="start" class="btn btn-success btn-large master">Start!</button>
-                    <button type="button" id="stop" class="btn btn-danger btn-large slave pull-right">Stop!</button>
-                </p>
 
 
+                <div class="row">
+                    <div class="col-lg-8 col-offset-2">
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-success progress-striped" data-bind="attr: { style: progressGreen }">Progress: <span class="simStatus" data-bind="text: progressDisplay"></span></div>
+                            <div class="progress-bar progress-bar-danger progress-striped" data-bind="attr: { style: progressRed }"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
+
 
 
 
@@ -110,8 +112,8 @@
                                 <div class="form-group">
                                     <label for="action" class="col-lg-4 control-label">Simulation Scenario</label>
                                     <div class="col-lg-8">
-                                       <!--  <input type="text" class="form-control input-small" id="action" placeholder="Example: logon" data-bind="value: config.action"> -->
-                                        <select class="form-control" data-bind="value: config.action">
+                                       <!--  <input type="text" class="form-control input-small" id="action" placeholder="Example: logon" data-bind="value: config().action"> -->
+                                        <select id="action" class="form-control" data-bind="value: config.action">
                                             <option value="logon">Log On</option>
                                             <option value="startup">Start</option>
                                             <option value="logoff">Log off</option>
@@ -156,6 +158,8 @@
         <script src="js/knockout-2.3.0.js"></script>
         <script src="js/globalize.min.js"></script>
         <script src="js/dx.chartjs.js"></script>
+<!--
         <script src="js/app.js"></script>
+-->
         <script src="js/client.js"></script>
 </html>
