@@ -22,7 +22,7 @@ function deviceObject (mac, e164, be164) {
     this.wpiTimes = [];
     this.overloaded = 0;
     this.pass = "000000";
-    this.count = { sent:0, finished:0};
+    this.count = { sent:0, finished:0, duration:0};
 
     init(this);
 };

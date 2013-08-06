@@ -7,7 +7,7 @@ var simulator = require(__dirname + '/../../simulator');
 module.exports = function (device, nextState){
     fsmlog.info("Handler: Overload starting for device %s", device.mac);
     device.wpiTimes[device.wpiTimes.length-1].overload++;
-    out.debug("Set overload for",device.mac)
+
     simulator.setOverloaded(device.mac);
     var time = getRandomInt();
     fsmlog.info("Waiting for $s seconds....", time);

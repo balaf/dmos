@@ -76,9 +76,10 @@ wss.on('connection', function(ws) {
     }
 
     function checkEnd (){
+
         var result = getResult();
         var end = false;
-        if (result.status.status === "finished") {
+        if ((result.status.status === "finished") || (result.status.status === "ready")) {
             result = getFinalResult();
             out.info("Results:", result);
             log.info("Results:", result);
@@ -87,6 +88,8 @@ wss.on('connection', function(ws) {
             simulator.setStatus("finished");
             end = true;
         }
+        out.debug("Status:", result.status.status)
+        out.debug("CheckEnd:  Started: %s, Finished %s, Failed: %s, Target: %s ",result.stats.started,result.stats.finished,result.stats.failed,result.config.users  )
         return end;
     }
 

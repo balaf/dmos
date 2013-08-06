@@ -32,11 +32,17 @@ module.exports = function (device, nextState){
         device.state = nextState;
         fsmlog.info("New state for device %s is %s", device.mac, device.state);
         var random = getRandomInt(1,3);
-        if (random < 2.1) {
-            device.emit("CleanUp", "CleanUp", device);
+        fsmlog.debug("Random Number is:", random);
+        if (random > 1) {
+            setTimeout(function(){
+                device.emit("CleanUp", "CleanUp", device);
+            }, 2000);
         } else {
-            device.emit("Overload", "Overload", device);
-            fsmlog.info("Overlooooaaaaddddd");
+            setTimeout(function(){
+                device.emit("Overload", "Overload", device);
+                fsmlog.debug("Overlooooaaaaddddd");
+            },2000)
+
         }
     }
 }

@@ -1,9 +1,14 @@
 .master{
     width: 58%;
+ /*   background-color: mag;*/
 }
 
 .slave{
     width: 38%;
+}
+
+#results {
+    width: 100%;
 }
 
 .page-header {
@@ -75,6 +80,10 @@
 /* modal settings */
 .myModal {
     width: 700px
+}
+
+.resultsModal {
+ /*   width: 800px;*/
 
 }
 .help-block{

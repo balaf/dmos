@@ -45,31 +45,46 @@ module.exports = function (device, nextState){
     } else {
         device.state = nextState;
         var random = getRandomInt(1,3);
+        fsmlog.debug("Random Number is:", random);
         switch(device.state) {
             case 'logon-1':
-                if (random < 1.1) {
-                    device.emit("WriteItems", "WriteItems", device);
+                if (random > 1) {
+                    setTimeout(function(){
+                        device.emit("WriteItems", "WriteItems", device);
+                    },2000)
                 } else {
-                    device.emit("Overload", "Overload", device);
-                    fsmlog.info("Overlooooaaaaddddd");
+                    setTimeout(function(){
+                        device.emit("Overload", "Overload", device);
+                        fsmlog.debug("Overlooooaaaaddddd");
+                    },2000);
                 }
                 break;
             case 'logon-7':
-                if (random < 1.1) {
-                    device.emit("WriteItems", "WriteItems", device);
+                if (random > 1) {
+                    setTimeout(function(){
+                        device.emit("WriteItems", "WriteItems", device);
+                    },2000);
                 } else if (random < 2.1) {
-                    device.emit("CleanUp", "CleanUp", device);
+                    setTimeout(function(){
+                        device.emit("CleanUp", "CleanUp", device);
+                    },2000);
                 } else {
-                    device.emit("Overload", "Overload", device);
-                    fsmlog.info("Overlooooaaaaddddd");
+                    setTimeout(function(){
+                        device.emit("Overload", "Overload", device);
+                        fsmlog.debug("Overlooooaaaaddddd");
+                    },200)
                 }
                 break;
             case 'logoff-1':
                 if (random < 2.1) {
-                    device.emit("ReadItems", "ReadItems", device);
+                    setTimeout(function(){
+                        device.emit("ReadItems", "ReadItems", device);
+                    },2000)
                 } else {
-                    device.emit("Overload", "Overload", device);
-                    fsmlog.info("Overlooooaaaaddddd");
+                    setTimeout(function(){
+                        device.emit("Overload", "Overload", device);
+                        fsmlog.debug("Overlooooaaaaddddd");
+                    },2000)
                 }
                 break;
         }

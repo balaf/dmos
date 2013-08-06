@@ -48,9 +48,15 @@ module.exports = function (device, nextState){
     } else {
         device.state = nextState;
         if (nextState === "startup-1") {
-            device.emit("WriteItems", "WriteItems", device);
+            setTimeout(function(){
+                device.emit("WriteItems", "WriteItems", device);
+            },2000)
+
         } else {
-            device.emit("CleanUp", "CleanUp", device);
+            setTimeout(function(){
+                device.emit("CleanUp", "CleanUp", device);
+            },2000)
+
         }
     }
 

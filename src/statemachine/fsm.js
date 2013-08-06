@@ -55,13 +55,15 @@ fsm.addHandler('CleanUp',       'logon-5',      handler.handleCleanUp,         '
 fsm.addHandler('CleanUpDone',   'logon-6',      handler.sendInventoryChanges,  'logon-7');
 //7
 fsm.addHandler('Overload',      'logon-7',      handler.handleOverload,        'logon-6');
-fsm.addHandler('CleanUp',       'logon-7',      handler.simFinished,           'idle');
+fsm.addHandler('CleanUp',       'logon-7',      handler.handleCleanUp,         'logon-10');
 fsm.addHandler('WriteItems',    'logon-7',      handler.handleWriteItems,      'logon-8');
 //8
 fsm.addHandler('WriteItemsDone','logon-8',      handler.replyToWriteItems,     'logon-9');
 //9
 fsm.addHandler('Overload',      'logon-9',      handler.handleOverload,        'logon-8');
-fsm.addHandler('CleanUp',       'logon-9',      handler.simFinished,           'idle');
+fsm.addHandler('CleanUp',       'logon-9',      handler.handleCleanUp,         'logon-10');
+//10
+fsm.addHandler('CleanUpDone',   'logon-10',     handler.simFinished,           'idle');
 
 //// startUp
 fsm.addHandler('startup',       'idle',         handler.startStartUp,          'startup');

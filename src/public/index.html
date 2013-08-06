@@ -2,8 +2,9 @@
     <html lang="en">
         <head>
             <meta charset="utf-8">
-            <title>OpenScape DLS - Simulator</title>
+            <title>OpenScape DLS - Performance Test Tool</title>
             <link rel="stylesheet" href="css/bootstrap.min.css">
+            <link rel="stylesheet" href="css/style.css">
             <link rel="stylesheet" href="css/style.css">
         </head>
         <body>
@@ -32,7 +33,7 @@
                 <div class="row">
                     <div class="col-lg-5 col-offset-1">
                         <h5 class="center">Individual Requests</h5>
-                        <div id="countChart" class="chart" data-bind="dxChart: {dataSource: countChartData, argumentAxis: argAxis2}"></div>
+                        <div id="countChart" class="chart" data-bind="dxChart: {dataSource: countChartData}"></div>
                         <div class="text">View the number of requests sent/completed per device</div>
                     </div>
                     <div class="col-lg-5">
@@ -57,8 +58,30 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="row">
+                    <div class="col-lg-10 col-offset-1">
+                        <a href="#resultsModal" data-toggle="modal"  id="results" class="btn btn-primary btn-large">View final Results</a>
+                    </div>
+                </div>
+
             </div>
 
+            <!-- Results -->
+            <div class="modal fade" id="resultsModal" data-backdrop="static">
+                <div class="modal-dialog resultsModal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title">Simulation Results</h4>
+                        </div>
+                        <div class="modal-body">
+                        </div>
+                        <div class="modal-footer">
+                            <a href="#" data-dismiss="modal" class="btn btn-default">Close</a>
+                        </div>
+                    </div><!-- /.modal-content -->
+                </div><!-- /.modal-dialog -->
+            </div><!-- /.modal -->
 
 
 

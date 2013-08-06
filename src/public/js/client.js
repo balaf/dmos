@@ -34,8 +34,8 @@ var simConfig = {
     mac : "03:00:00:00:00:00",
     be164 : 3021080000,
     e164 : 4021080000,
-    action: 'startup',
-    users: 1,
+    action: 'logon',
+    users: 100,
     targetRate: 1 //(users/sec)
 };
 
@@ -99,15 +99,26 @@ connection.onmessage = function (e) {
         $('#stop').attr('disabled', 'disabled');
         $('#start').removeAttr('disabled');
         $('#saveBt').removeAttr('disabled');
+        $('#results').removeAttr('disabled');
+        $('#results').show();
 
     } else if (simStatus.status === "stopped") {
         $('#stop').attr('disabled', 'disabled');
         $('#saveBt').attr('disabled', 'disabled');
         $('#start').attr('disabled', 'disabled');
+        $('#results').attr('disabled', 'disabled');
+        $('#results').hide();
+    } else if( simStatus.status === "ready") {
+        $('#stop').attr('disabled', 'disabled');
+        $('#start').removeAttr('disabled');
+        $('#saveBt').removeAttr('disabled');
+        $('#results').hide();
     } else {
         $('#stop').removeAttr('disabled');
         $('#saveBt').attr('disabled', 'disabled');
         $('#start').attr('disabled', 'disabled');
+  //      $('#results').attr('disabled', 'disabled');
+//        $('#results').hide()
     }
     console.log("Status:", simStatus.status);
 
@@ -177,16 +188,28 @@ connection.onmessage = function (e) {
 
         var tmpCountChartData = [];
         var tmpHistoChartData = []
-        console.log("Device length ", simStats.histogram.length);
-        for (var i=0; i<simStats.histogram.length; i++){
-            //tmpCountChartData[i] = { id: i, count: simStats.devices[i].count.sent, completed: simStats.devices[i].count.finished}
-            tmpHistoChartData[i] = { id: i, time: simStats.histogram[i]}
+        if (simActualConfig.mac){
+            var index = macToInt(simActualConfig.mac);
         }
-        console.log('Obj:', tmpHistoChartData)
+        for (var i=0; i<simActualConfig.users; i++){
+            var sent = 0;
+            var finished = 0;
+            var duration = 0;
+            if (simStats.devices[decToMac(index)]) {
+                sent = simStats.devices[decToMac(index)].count.sent;
+                finished = simStats.devices[decToMac(index)].count.finished;
+                duration = roundTo2Decimals(simStats.devices[decToMac(index)].count.duration/1000);
+            }
+            //tmpCountChartData[i] = { id: i, count: simStats.devices[i].count.sent, completed: simStats.devices[i].count.finished}
+            tmpHistoChartData[i] = { id: i, time: duration}
+            tmpCountChartData[i] = { id: i, sent: sent, completed: finished}
+            index++;
+        }
+        console.log('Obj:', tmpCountChartData)
         App.queueChartData.push(tmpQueueChartData);
         App.rateChartData.push(tmpRateChartData);
-        App.countChartData.push(tmpCountChartData);
-        App.histoChartData.push(tmpHistoChartData);
+        App.countChartData(tmpCountChartData);
+        App.histoChartData(tmpHistoChartData);
 
      /*   console.log("actualArrivalRate:", actualArrivalRate);
         console.log("actualFinishRate:", actualFinishRate);
@@ -317,21 +340,6 @@ function AppViewModel() {
       }
       return axis;
     },this);
-    this.argAxis2 = ko.computed(function(){
-        var axis = {
-            hoverMode: 'allArgumentPoints',
-            axisDivisionFactor : 20,
-            max : this.targetUsers(),
-            min: 0,
-            title : {
-                text : "Devices"
-            },
-            font : {
-                size: 11
-            }
-        }
-        return axis;
-    },this);
 }
 
 
@@ -386,6 +394,7 @@ $(document).ready(function () {
         message.action = "stop";
 
         connection.send(JSON.stringify(message));
+        console.log(message);
         $('#stop').attr('disabled', 'disabled');
 
     });
@@ -404,16 +413,14 @@ function roundTo2Decimals(numberToRound) {
 
 function drawCountChart(){
     $("#countChart").dxChart({
-        dataSource: [{ time: 0, sent: 0, completed: 0}],
-        adjustOnZoom: true,
+        dataSource: [{ id: 0, sent: 0, completed: 0}],
+        adjustOnZoom: false,
         animation :{
             enabled: false
         },
         argumentAxis : {
             hoverMode: 'allArgumentPoints',
             axisDivisionFactor : 20,
-            max : simConfig.users,
-            min: 0,
             title : {
                 text : "Devices"
             },
@@ -423,7 +430,7 @@ function drawCountChart(){
         },
         valueAxis : {
             axisDivisionFactor : 20,
-            max : 8,
+            max: 7,
             min: 0,
             title : {
                 text : "requests sent/finished"
@@ -442,7 +449,7 @@ function drawCountChart(){
             border:{
                 visible: true
             },
-            argumentField: 'time',
+            argumentField: 'id',
             line: {
                 hoverStyle: {
                     width: 3
@@ -450,7 +457,7 @@ function drawCountChart(){
             },
             hoverMode: 'allArgumentPoints',
             point: {
-                size: 2,
+                size: 1,
                 hoverStyle: {
                     width: 2
                 }
@@ -462,15 +469,15 @@ function drawCountChart(){
                 }
             }
         },
-        series: [{name: '',valueField: 'sent'},
-                 {name: '', valueField: 'completed' }],
+        series: [{name: '',valueField: 'sent', color: 'red'},
+                 {name: '', valueField: 'completed', color: 'green'}],
         legend: {visible: false}
     });
 }
 
 function drawHistoChart(){
     $("#histoChart").dxChart({
-        dataSource: [{ time: 0, duration: 0}],
+        dataSource: [{ id: 0, duration: 0}],
         adjustOnZoom: true,
         animation :{
             enabled: false
@@ -478,8 +485,6 @@ function drawHistoChart(){
         argumentAxis : {
             hoverMode: 'allArgumentPoints',
             axisDivisionFactor : 20,
-            max : 100,//simConfig.users,
-            min: 0,
             title : {
                 text : "Devices"
             },
@@ -521,12 +526,9 @@ function drawHistoChart(){
                     width: 2
                 }
             },
-            type: "steparea",
-            steparea: {
-                border: {
-                    visible: true
-                }
-            }
+            type: "bar",
+            color: 'blue',
+            border: {width: 1, color: 'red', visible: true}
         },
         series: [{
             name: '',
@@ -546,8 +548,6 @@ function drawQueueChart(){
         argumentAxis : {
             hoverMode: 'allArgumentPoints',
             axisDivisionFactor : 20,
-        //    max : simConfig.users / simConfig.targetRate + 60,
-            min: 0,
             title : {
                 text : "Time (sec)"
             },
@@ -557,7 +557,6 @@ function drawQueueChart(){
         },
         valueAxis : {
             axisDivisionFactor : 20,
-            //max : (simConfig.users + 0.1*simConfig.users)*0.2,
             min: 0,
             title : {
                 text : "Queue Size (#req)"
@@ -674,4 +673,30 @@ function drawRateChart(){
             rowItemSpacing: 5
         }
     });
+}
+
+function macToInt (mac) {
+    return parseInt(parseInt(mac.replace(/:/g,"")),16)
+}
+
+function isEven(value){
+    if (value%2 == 0)
+        return true;
+    else
+        return false;
+}
+
+function decToMac(d){
+    var mac="";
+    var hex = Number(d).toString(16);
+    if (!isEven(hex.length))
+        hex = "0" + hex;
+    hex = hex.toUpperCase();
+    for (var i=0;i<hex.length;i+=2){
+        if (i+2 < hex.length)
+            mac += hex.substring(i,i+2) + ":";
+        else
+            mac += hex.substring(i,i+2)
+    }
+    return mac;
 }

@@ -6,7 +6,7 @@ var stats = {
     finished : 0,
     failed: 0,
     overloaded: 0,
-    lastStarted : 1,
+    lastStarted : 0,
     lastFinished : 0,
     firstStarted : 0,
     firstFinished : 0
@@ -30,7 +30,7 @@ function updateOnFinish(status) {
     stats.max = getMax(stats.devices);
     stats.mean = getMean (stats.devices);
     stats.variance = getVariance (stats.devices, stats.mean);
-    stats.histogram = getHistogram (stats.devices);
+   // stats.histogram = getHistogram (stats.devices);
 }
 
 function reset() {
@@ -39,7 +39,7 @@ function reset() {
     stats.finished = 0;
     stats.overloaded = 0;
     stats.failed = 0;
-    stats.lastStarted = 1;
+    stats.lastStarted = 0;
     stats.lastFinished = 0;
     stats.firstStarted = 0;
     stats.firstFinished = 0;
@@ -70,7 +70,7 @@ function getMin(devices) {
         if (devices.hasOwnProperty(mac)) {
             if (devices[mac].progress === "finished") {
                 if (devices[mac].duration < min) {
-                   min =  devices[mac].duration;
+                   min =  devices[mac].count.duration;
                 }
             }
         }
@@ -86,7 +86,7 @@ function getMax(devices) {
         if (devices.hasOwnProperty(mac)) {
             if (devices[mac].progress === "finished") {
                 if (devices[mac].duration > max) {
-                    max =  devices[mac].duration;
+                    max =  devices[mac].count.duration;
                 }
             }
         }
@@ -103,7 +103,7 @@ function getMean(devices) {
     for (mac in devices) {
         if (devices.hasOwnProperty(mac)) {
             if (devices[mac].progress === "finished") {
-                total += devices[mac].duration;
+                total += devices[mac].count.duration;
                 finished++;
             }
         }
@@ -119,7 +119,7 @@ function getVariance (devices, mean) {
     for (mac in devices) {
         if (devices.hasOwnProperty(mac)) {
             if (devices[mac].progress === "finished") {
-                total += Math.pow((devices[mac].duration-mean),2);
+                total += Math.pow((devices[mac].count.duration-mean),2);
                 finished++;
             }
         }
@@ -137,7 +137,7 @@ function getHistogram(devices){
     for (mac in devices) {
         if (devices.hasOwnProperty(mac)) {
             if (devices[mac].progress === "finished") {
-                histo.push(devices[mac].duration);
+                histo.push(devices[mac].count.duration);
             } else {
                 histo.push(0);
             }
