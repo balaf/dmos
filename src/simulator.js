@@ -24,11 +24,11 @@ module.exports.start = function(config){
     /// Base values
     var baseValues = {
         mac : macToInt(simConfig.mac),
-        be164 : simConfig.be164,
-        e164 : simConfig.e164
+        be164 : parseInt(simConfig.be164),
+        e164 : parseInt(simConfig.e164)
     };
 
-    var devices = initializeDevices(simConfig.users, baseValues);
+    var devices = initializeDevices(simConfig, baseValues);
     out.info("Initializing %s devices", devices.length);
     log.info("Initializing %s devices", devices.length);
 
@@ -103,13 +103,17 @@ module.exports.start = function(config){
 
 /////////////  HELPER FUNCTIONS ////////////////
 
-    function initializeDevices(num, baseValues){
+    function initializeDevices(config, baseValues){
         var dev = [];
         var mac;
-        for (var i=0;i<num;i++){
+        for (var i=0;i<config.users;i++){
             mac =  decToMac(i+baseValues.mac)
             dev[i] = new Device(mac, i+baseValues.e164, i+baseValues.be164);
             dev[i].on("simFinished", endOne);
+            dev[i].firmware = config.firmware;
+            dev[i].pass = config.pass;
+            dev[i].softwareType = config.softwareType;
+            dev[i].deviceType = config.deviceType;
         }
         return dev;
     }

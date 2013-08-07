@@ -198,8 +198,11 @@
                                 <li>
                                     <a data-toggle="tab" href="#confDLS">DLS</a>
                                 </li>
+                                <li>
+                                    <a data-toggle="tab" href="#confDevice">Device</a>
+                                </li>
                                 <li class="disabled">
-                                    <a data-toggle="tab" href="#conMobility">Mobility Data</a>
+                                    <a data-toggle="tab" href="#confMobility">Mobility Data</a>
                                 </li>
                                 <li class="disabled">
                                     <a data-toggle="tab" href="#confDelays">Delays</a>
@@ -277,7 +280,53 @@
                                         </div>
                                     </form>
                                 </div>
-                                <div id="conMobility" class="tab-pane fade">
+                                <div id="confDevice" class="tab-pane fade">
+                                    <form class="form-horizontal">
+                                        <!--  SW version -->
+                                        <div class="form-group">
+                                            <label for="pass" class="col-lg-4 control-label">User Password</label>
+                                            <div class="col-lg-6">
+                                                <input type="text" class="form-control input-small" id="pass" placeholder="Example: 000000" data-bind="value: config.pass">
+                                                <span class="help-block">Mobile User Password</span>
+                                            </div>
+                                        </div>
+                                        <!--  Device Type -->
+                                        <div class="form-group">
+                                            <label for="deviceType" class="col-lg-4 control-label">Device Model</label>
+                                            <div class="col-lg-6">
+                                                <!--  <input type="text" class="form-control input-small" id="action" placeholder="Example: logon" data-bind="value: config().action"> -->
+                                                <select id="deviceType" class="form-control" data-bind="value: config.deviceType">
+                                                    <option value="OpenStage 60">OpenStage 60</option>
+                                                    <option value="OpenStage 60">OpenStage 60</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <!--  SW TYpe -->
+                                        <div class="form-group">
+                                            <label for="softwareType" class="col-lg-4 control-label">Device Type</label>
+                                            <div class="col-lg-6">
+                                                <select id="softwareType" class="form-control" data-bind="value: config.softwareType">
+                                                    <option value="Siemens SIP">Siemens SIP</option>
+                                                    <option value="Siemens HFA">Siemens HFA</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <!--  SW version -->
+                                        <div class="form-group">
+                                            <label for="firmware" class="col-lg-4 control-label">Software Version</label>
+                                            <div class="col-lg-6">
+                                                <select id="firmware" class="form-control" data-bind="value: config.firmware">
+                                                    <option value="V3 R1.41.1">V3 R1.41.1</option>
+                                                    <option value="V3 R1.42.1">V3 R1.42.1</option>
+                                                </select>
+                                                <span class="help-block">The version number of the phone software</span>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div id="confMobility" class="tab-pane fade">
                                     <form class="form-horizontal">
                                     </form>
                                 </div>

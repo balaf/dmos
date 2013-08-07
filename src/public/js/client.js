@@ -36,7 +36,11 @@ var simConfig = {
     e164 : 4021080000,
     action: 'logon',
     users: 100,
-    targetRate: 1 //(users/sec)
+    targetRate: 1, //(users/sec)
+    pass: '000000',
+    firmware:  'V3 R1.41.1',
+    deviceType: 'OpenStage 60',
+    softwareType: 'Siemens SIP'
 };
 
 var simStats = {};
@@ -275,7 +279,11 @@ function AppViewModel() {
             e164 : ko.protectedObservable(simConfig.e164),
             action: ko.protectedObservable(simConfig.action),
             users: ko.protectedObservable(simConfig.users),
-            targetRate: ko.protectedObservable(simConfig.targetRate) //(users/sec)
+            targetRate: ko.protectedObservable(simConfig.targetRate), //(users/sec)
+            pass : ko.protectedObservable(simConfig.pass),
+            firmware : ko.protectedObservable(simConfig.firmware),
+            deviceType : ko.protectedObservable(simConfig.deviceType),
+            softwareType : ko.protectedObservable(simConfig.softwareType)
         };
     this.deviceStats = ko.observableArray(simStats.devices);
 
@@ -285,6 +293,7 @@ function AppViewModel() {
             this.targetArrivalRate(this.config['targetRate']());
             this.targetUsers(this.config['users']());
             simConfig[key] = this.config[key]();
+            console.log(key, ' : ', simConfig[key]) ;
         }
     };
     this.cancelConfig = function(){

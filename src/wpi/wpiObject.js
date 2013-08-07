@@ -72,13 +72,13 @@ function invChanges(device,type){
     wpiMsg.addRfc('inventory-changes');
 
     var items = {
-        'device-type' : {'value' : 'OpenStage 60'},
-        'related-device-type' : {'value' : 'OpenStage 60'},
+        'device-type' : {'value' : device.deviceType},
+        'related-device-type' : {'value' : device.deviceType},
         'gigabit-ethernet-enabled' : {'value' : 'false'},
-        'software-type' : {'value' : 'Siemens SIP'},
-        'related-software-type' : {'value' : 'Siemens SIP'},
-        'software-version' : {'value' : 'V3 R1.41.1'},
-        'related-software-version' : {'value' : 'V3 R1.41.1'},
+        'software-type' : {'value' : device.softwareType},
+        'related-software-type' : {'value' : device.softwareType},
+        'software-version' : {'value' : device.firmware},
+        'related-software-version' : {'value' : device.firmware},
         'contact-me-uri' : {'value' : 'http://192.168.40.5:8085/contact_dls.html/ContactDLS'},
         'mac-addr' : {'value' : device.mac},
         'configuration-changed-flag' : {'value' : 'false'},
@@ -125,13 +125,13 @@ function startUp(device){
     wpiMsg.addRfc('start-up');
 
     var items = {
-        'device-type' : {'value' : 'OpenStage 60'},
-        'related-device-type' : {'value' : 'OpenStage 60'},
+        'device-type' : {'value' : device.deviceType},
+        'related-device-type' : {'value' : device.deviceType},
         'gigabit-ethernet-enabled' : {'value' : 'false'},
-        'software-type' : {'value' : 'Siemens SIP'},
-        'related-software-type' : {'value' : 'Siemens SIP'},
-        'software-version' : {'value' : 'V3 R1.41.1'},
-        'related-software-version' : {'value' : 'V3 R1.41.1'},
+        'software-type' : {'value' : device.softwareType},
+        'related-software-type' : {'value' : device.softwareType},
+        'software-version' : {'value' : device.firmware},
+        'related-software-version' : {'value' : device.firmware},
         'contact-me-uri' : {'value' : 'http://192.168.40.5:8085/contact_dls.html/ContactDLS'},
         'mac-addr' : {'value' : device.mac},
         'configuration-changed-flag' : {'value' : 'false'},
@@ -198,13 +198,13 @@ function replyToReadAll(device){
     wpiMsg.addRfc('reply-to', { 'status' : 'accepted', 'action' :'ReadAllItems'});
 
     var items = {
-        'device-type' : {'value' : 'OpenStage 60'},
-        'related-device-type' : {'value' : 'OpenStage 60'},
+        'device-type' : {'value' : device.deviceType},
+        'related-device-type' : {'value' : device.deviceType},
         'gigabit-ethernet-enabled' : {'value' : 'false'},
-        'software-type' : {'value' : 'Siemens SIP'},
-        'related-software-type' : {'value' : 'Siemens SIP'},
-        'software-version' : {'value' : 'V3 R1.41.1'},
-        'related-software-version' : {'value' : 'V3 R1.41.1'},
+        'software-type' : {'value' : device.softwareType},
+        'related-software-type' : {'value' : device.softwareType},
+        'software-version' : {'value' : device.firmware},
+        'related-software-version' : {'value' : device.firmware},
         'contact-me-uri' : {'value' : 'http://192.168.40.5:8085/contact_dls.html/ContactDLS'},
         'mac-addr' : {'value' : device.mac},
         'configuration-changed-flag' : {'value' : 'false'},
