@@ -88,8 +88,8 @@ wss.on('connection', function(ws) {
             simulator.setStatus("finished");
             end = true;
         }
-        out.debug("Status:", result.status.status)
-        out.debug("CheckEnd:  Started: %s, Finished %s, Failed: %s, Target: %s ",result.stats.started,result.stats.finished,result.stats.failed,result.config.users  )
+        //out.debug("Status:", result.status.status)
+        //out.debug("CheckEnd:  Started: %s, Finished %s, Failed: %s, Target: %s ",result.stats.started,result.stats.finished,result.stats.failed,result.config.users  )
         return end;
     }
 

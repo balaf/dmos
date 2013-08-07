@@ -30,7 +30,7 @@ function sendRequest(msg,obj,callback) {
     out.info("Header:", options.headers)
 
     var req = https.request(options,callback);
-
+    //out.debug("Sending request:", msg);
     req.on('error', function(e) {
         log.error('Request could not be sent: ' + e.message);
         out.error('Request could not be sent: ' + e.message);

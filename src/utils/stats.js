@@ -69,7 +69,7 @@ function getMin(devices) {
     for (mac in devices) {
         if (devices.hasOwnProperty(mac)) {
             if (devices[mac].progress === "finished") {
-                if (devices[mac].duration < min) {
+                if (devices[mac].count.duration < min) {
                    min =  devices[mac].count.duration;
                 }
             }
@@ -85,7 +85,7 @@ function getMax(devices) {
     for (mac in devices) {
         if (devices.hasOwnProperty(mac)) {
             if (devices[mac].progress === "finished") {
-                if (devices[mac].duration > max) {
+                if (devices[mac].count.duration > max) {
                     max =  devices[mac].count.duration;
                 }
             }

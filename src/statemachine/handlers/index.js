@@ -1,6 +1,7 @@
 'use strict';
 
 var fsmlog = require(__dirname + '/../../utils/logger').fsmlog;
+var simulator = require(__dirname + '/../../simulator');
 
 
 var sendInventoryChanges = require(__dirname +'/sendInventoryChanges');
@@ -18,8 +19,9 @@ var handleReadAllItems = require (__dirname + '/handleReadAllItems');
 var handleReadItemsDone = require (__dirname + '/handleReadItemsDone');
 var handleReadAllItemsDone = require (__dirname + '/handleReadAllItemsDone');
 
-function defaultHandler(){
+function defaultHandler(device){
     fsmlog.debug ("Default Handler Triggered");
+    simulator.setFailed();
 }
 
 module.exports = {

@@ -29,7 +29,7 @@
 
                 <div class="row">
                     <div class="col-lg-4 ">
-                        <table class="table table-striped">
+                        <table class="table table-striped table-hover table-bordered">
                             <caption> Request Rates</caption>
                             <tr>
                                 <th>Target Request Rate</th>
@@ -44,13 +44,36 @@
                                 <td data-bind="text: actualFinishRate"></td>
                             </tr>
                         </table>
+                        <table class="table table-striped table-hover table-bordered">
+                            <caption> Start/End Time</caption>
+                            <tr>
+                                <th>Start Time</th>
+                                <td data-bind="text: startTime"></td>
+                            </tr>
+                            <tr>
+                                <th>End Time</th>
+                                <td data-bind="text: endTime"></td>
+                            </tr>
+                            <tr>
+                                <th>Duration (sec)</th>
+                                <td data-bind="text: currentDuration"></td>
+                            </tr>
+                        </table>
                     </div>
 
                     <div class="col-lg-4 ">
-                        <table class="table table-striped">
+                        <table class="table table-striped table-hover table-bordered">
                             <caption> Progress</caption>
+                            <tr class="danger">
+                                <th>Scenario:</th>
+                                <td data-bind="text: action"></td>
+                            </tr>
                             <tr>
-                                <th>Request Started:</th>
+                                <th>Target:</th>
+                                <td data-bind="text: targetUsers"></td>
+                            </tr>
+                            <tr>
+                                <th>Started:</th>
                                 <td data-bind="text: startedUsers"></td>
                             </tr>
                             <tr>
@@ -69,26 +92,49 @@
                     </div>
 
 
+
+
                     <div class="col-lg-4 ">
-                        <table class="table table-striped">
-                            <caption> Start/End Time</caption>
+                        <table class="table table-striped table-hover table-bordered">
+                            <caption> Completion Times (sec)</caption>
                             <tr>
-                                <th>Start Time</th>
-                                <td data-bind="text: startTime"></td>
+                                <th>Min:</th>
+                                <td data-bind="text: min"></td>
                             </tr>
                             <tr>
-                                <th>End Time</th>
-                                <td data-bind="text: endTime"></td>
+                                <th>Max:</th>
+                                <td data-bind="text: max"></td>
                             </tr>
                             <tr>
-                                <th>Duration (sec)</th>
-                                <td data-bind="text: currentDuration"></td>
+                                <th>Mean:</th>
+                                <td data-bind="text: mean"></td>
+                            </tr>
+                            <tr>
+                                <th>Variance:</th>
+                                <td data-bind="text: variance"></td>
                             </tr>
                         </table>
                     </div>
 
                 </div>
 
+
+                <div class="row">
+                    <div class="col-lg-6 col-offset-3">
+                        <table class="table table-striped table-hover table-bordered">
+                            <tr class="warning">
+                                <th style="width: 20%;">Status:</th>
+                                <td data-bind="text: statusText"></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-lg-10 col-offset-1">
+                        <div class="progress progress-striped" id="status">
+                            <div class="progress-bar progress-bar-warning" data-bind="attr: { style: progressWidth }"></div>
+                            <div id="statusText">Progress: <span class="simStatus" data-bind="text: progressDisplay"></span></div>
+                        </div>
+                    </div>
+                </div>
 
 
                 <div class="row">
@@ -98,18 +144,11 @@
                 </div>
 
 
-                <div class="row">
-                    <div class="col-lg-8 col-offset-2">
-                        <div class="progress">
-                            <div class="progress-bar progress-bar-success progress-striped" data-bind="attr: { style: progressGreen }">Progress: <span class="simStatus" data-bind="text: progressDisplay"></span></div>
-                            <div class="progress-bar progress-bar-danger progress-striped" data-bind="attr: { style: progressRed }"></div>
-                        </div>
-                    </div>
-                </div>
+
 
                 <div class="row">
                     <div class="col-lg-10 col-offset-1">
-                        <a href="#resultsModal" data-toggle="modal"  id="results" class="btn btn-primary btn-large">View final Results</a>
+                        <a href="#resultsModal" data-toggle="modal"  id="results" class="btn btn-primary btn-small">View final Results</a>
                     </div>
                 </div>
 
@@ -186,7 +225,7 @@
                                         <div class="form-group">
                                             <label for="users" class="col-lg-4 control-label">Number of Users</label>
                                             <div class="col-lg-6">
-                                                <input type="text" class="form-control input-small" id="users" placeholder="Example: 10000" data-bind="value: config.users">
+                                                <input type="number" class="form-control input-small" id="users" placeholder="Example: 10000" data-bind="value: config.users">
                                                 <span class="help-block">The total number of request that the simulator will send to DLS</span>
                                             </div>
                                         </div>
@@ -195,7 +234,7 @@
                                         <div class="form-group">
                                             <label for="targetRate" class="col-lg-4 control-label">Request Rate (per second)</label>
                                             <div class="col-lg-6">
-                                                <input type="text" class="form-control input-small" id="targetRate" placeholder="Example: 10000" data-bind="value: config.targetRate">
+                                                <input type="number" class="form-control input-small" id="targetRate" placeholder="Example: 10000" data-bind="value: config.targetRate">
                                                 <span class="help-block">The number of requests pre second that the simulator will send to DLS</span>
                                             </div>
                                         </div>

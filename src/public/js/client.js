@@ -101,11 +101,11 @@ connection.onmessage = function (e) {
         $('#stop').removeAttr('disabled');
         $('#saveBt').attr('disabled', 'disabled');
         $('#start').attr('disabled', 'disabled');
-  //      $('#results').attr('disabled', 'disabled');
-//        $('#results').hide()
+        $('#results').attr('disabled', 'disabled');
+        $('#results').hide()
     }
     console.log("Status:", simStatus.status);
-
+    App.status(simStatus.status);
 
     if (jsonData.stats) {
         simStats = jsonData.stats;
@@ -117,6 +117,7 @@ connection.onmessage = function (e) {
         simStats.firstFinished = new Date(jsonData.stats.firstFinished);
         simStats.now = new Date(jsonData.stats.now);
         simActualConfig = jsonData.config;
+        simActualConfig.targetRate = parseFloat(jsonData.config.targetRate);
 
         console.log(simStats);
 
@@ -128,8 +129,13 @@ connection.onmessage = function (e) {
         currentDuration = 0;
 
         /// 1. none or only one has yet finished
-        if (simStats.finished <=1) {
-            actualArrivalRate = simStats.started * 1000 / (simStats.lastStarted - simStats.firstStarted);
+        if ((simStats.started > 1) && (simStats.finished <=1)) {
+            currentDuration = (simStats.now - simStats.startTime)/1000;
+            if (simStats.firstFinished >= simStats.lastStarted) {
+                actualArrivalRate = 0;
+            } else {
+                actualArrivalRate = simStats.started * 1000 / (simStats.lastStarted - simStats.firstStarted);
+            }
         }
         else if ((simStats.started > 1) && (simStats.finished > 1)) {
             actualArrivalRate = simStats.started * 1000 / (simStats.lastStarted - simStats.firstStarted);
@@ -144,17 +150,18 @@ connection.onmessage = function (e) {
         }
 
         /// Update DOM on every message from the ws ////
-        App.targetArrivalRate(simConfig.targetRate);
-        App.targetUsers(simConfig.users);
+        App.action(simActualConfig.action);
+        App.targetArrivalRate(simActualConfig.targetRate.toFixed(2));
+        App.targetUsers(simActualConfig.users);
 
-        var displayStartTime = moment(simStats.startTime).startOf('hour').fromNow();
+        var displayStartTime = moment(simStats.startTime).fromNow();
         App.startTime(displayStartTime);
         App.endTime(simStats.endTime);
 
         /// Update DOM on every message from the ws ////
         App.actualArrivalRate(roundTo2Decimals(actualArrivalRate));
         App.actualFinishRate(roundTo2Decimals(actualFinishRate));
-        App.currentDuration(currentDuration);
+        App.currentDuration(toHHMMSS(currentDuration));
         //
 
         App.finishedUsers(simStats.finished);
@@ -170,30 +177,38 @@ connection.onmessage = function (e) {
             started: simStats.started,
             finished: simStats.finished};
 
-        var tmpCountChartData = [];
-        var tmpHistoChartData = []
-        if (simActualConfig.mac){
-            var index = macToInt(simActualConfig.mac);
-        }
-        for (var i=0; i<simActualConfig.users; i++){
-            var sent = 0;
-            var finished = 0;
-            var duration = 0;
-            if (simStats.devices[decToMac(index)]) {
-                sent = simStats.devices[decToMac(index)].count.sent;
-                finished = simStats.devices[decToMac(index)].count.finished;
-                duration = roundTo2Decimals(simStats.devices[decToMac(index)].count.duration/1000);
+        if (simStatus.status === "finished") {
+            var tmpCountChartData = [];
+            var tmpHistoChartData = []
+            if (simActualConfig.mac){
+                var index = macToInt(simActualConfig.mac);
             }
-            //tmpCountChartData[i] = { id: i, count: simStats.devices[i].count.sent, completed: simStats.devices[i].count.finished}
-            tmpHistoChartData[i] = { id: i, time: duration}
-            tmpCountChartData[i] = { id: i, sent: sent, completed: finished}
-            index++;
+            for (var i=0; i<simActualConfig.users; i++){
+                var sent = 0;
+                var finished = 0;
+                var duration = 0;
+                if (simStats.devices[decToMac(index)]) {
+                    sent = simStats.devices[decToMac(index)].count.sent;
+                    finished = simStats.devices[decToMac(index)].count.finished;
+                    duration = roundTo2Decimals(simStats.devices[decToMac(index)].count.duration/1000);
+                }
+                //tmpCountChartData[i] = { id: i, count: simStats.devices[i].count.sent, completed: simStats.devices[i].count.finished}
+                tmpHistoChartData[i] = { id: i, time: duration}
+                tmpCountChartData[i] = { id: i, sent: sent, completed: finished}
+                index++;
+            }
+            App.countChartData(tmpCountChartData);
+            App.histoChartData(tmpHistoChartData);
+
+            /// statistics
+            App.max(tFormat(simStats.max));
+            App.min(tFormat(simStats.min));
+            App.mean(tFormat(simStats.mean));
+            App.variance(tFormat(simStats.variance));
         }
 
         App.queueChartData.push(tmpQueueChartData);
         App.rateChartData.push(tmpRateChartData);
-        App.countChartData(tmpCountChartData);
-        App.histoChartData(tmpHistoChartData);
     }
 }
 
@@ -201,6 +216,34 @@ connection.onmessage = function (e) {
 ///////////////  Simulator GUI Model ///////////////
 
 function AppViewModel() {
+    this.action = ko.observable(0);
+    this.status = ko.observable(0);
+    this.statusText = ko.computed(function(){
+        var text;
+        switch (this.status()) {
+            case "ready":
+                text = "Ready to Start"
+                break;
+            case "finished":
+                text = "Finished"
+                break;
+            case "allSent":
+                text = "Running -Finished sending requests"
+                break;
+            case "started":
+                text = "Running"
+                break;
+            case "stopped":
+                text = "Stopped - Finishing pending requests"
+                break;
+        }
+        return text;
+    },this);
+
+    this.max = ko.observable(0);
+    this.min = ko.observable(0);
+    this.mean = ko.observable(0);
+    this.variance = ko.observable(0);
     this.targetArrivalRate = ko.observable(simConfig.targetRate);
     this.actualArrivalRate = ko.observable(0);
     this.actualFinishRate = ko.observable(0);
@@ -213,10 +256,10 @@ function AppViewModel() {
     this.startTime = ko.observable(0);
     this.endTime = ko.observable(new Date());
     this.progressGreen = ko.computed(function(){
-        return "width:" + roundTo2Decimals(-15+this.finishedUsers()*100/this.targetUsers()) +'%;';
+        return "width:" + roundTo2Decimals(this.finishedUsers()*100/this.targetUsers()) +'%;';
     },this);
     this.progressRed = ko.computed(function(){
-        return "width:" + roundTo2Decimals(15+this.failedUsers()*100/this.targetUsers()) +'%;';
+        return "width:" + roundTo2Decimals(this.failedUsers()*100/this.targetUsers()) +'%;';
     },this);
 
  ;
@@ -264,8 +307,11 @@ function AppViewModel() {
     }, this);
 
     this.progressDisplay = ko.computed(function() {
-        return roundTo2Decimals((100*(this.finishedUsers()+this.failedUsers()))/this.targetUsers()) + "%";
+        return roundTo2Decimals((100*(this.startedUsers()+this.finishedUsers()+this.failedUsers()))/(2*this.targetUsers())) + "%";
     }, this);
+    this.progressWidth = ko.computed(function(){
+        return "width:" + roundTo2Decimals((100*(this.startedUsers()+this.finishedUsers()+this.failedUsers()))/(2*this.targetUsers())) + "%";
+    },this);
 
     this.queueValueAxis = ko.computed(function(){
         var axis = {
@@ -300,7 +346,6 @@ function AppViewModel() {
 
     this.argAxis = ko.computed(function(){
       var axis = {
-          hoverMode: 'allArgumentPoints',
           axisDivisionFactor : 20,
         //  max : this.targetUsers() / this.targetArrivalRate() + 60,
           //max : simConfig.users / simConfig.targetRate + 60,
@@ -340,6 +385,7 @@ $(document).ready(function () {
         App.queueChartData.push(tmpQueueChartData);
         App.rateChartData.push(tmpRateChartData);
 
+        simStats = {};
 
         connection.send(JSON.stringify(message));
         console.log("Sent to server:",message);
@@ -377,7 +423,6 @@ function drawCountChart(){
             enabled: false
         },
         argumentAxis : {
-            hoverMode: 'allArgumentPoints',
             axisDivisionFactor : 20,
             title : {
                 text : "Devices"
@@ -408,17 +453,8 @@ function drawCountChart(){
                 visible: true
             },
             argumentField: 'id',
-            line: {
-                hoverStyle: {
-                    width: 3
-                }
-            },
-            hoverMode: 'allArgumentPoints',
             point: {
                 size: 1,
-                hoverStyle: {
-                    width: 2
-                }
             },
             type: "steparea",
             steparea: {
@@ -441,7 +477,6 @@ function drawHistoChart(){
             enabled: false
         },
         argumentAxis : {
-            hoverMode: 'allArgumentPoints',
             axisDivisionFactor : 20,
             title : {
                 text : "Devices"
@@ -472,17 +507,8 @@ function drawHistoChart(){
                 visible: true
             },
             argumentField: 'id',
-            line: {
-                hoverStyle: {
-                    width: 3
-                }
-            },
-            hoverMode: 'allArgumentPoints',
             point: {
                 size: 2,
-                hoverStyle: {
-                    width: 2
-                }
             },
             type: "bar",
             color: 'blue',
@@ -504,7 +530,6 @@ function drawQueueChart(){
             enabled: false
         },
         argumentAxis : {
-            hoverMode: 'allArgumentPoints',
             axisDivisionFactor : 20,
             title : {
                 text : "Time (sec)"
@@ -534,17 +559,8 @@ function drawQueueChart(){
                 visible: true
             },
             argumentField: 'time',
-            line: {
-                hoverStyle: {
-                    width: 3
-                }
-            },
-            hoverMode: 'allArgumentPoints',
             point: {
                 size: 2,
-                hoverStyle: {
-                    width: 2
-                }
             },
             type: "area",
             area: {
@@ -595,17 +611,8 @@ function drawRateChart(){
                 visible: true
             },
             argumentField: 'time',
-            line: {
-                hoverStyle: {
-                    width: 3
-                }
-            },
-            hoverMode: 'includePoints',
             point: {
                 size: 2,
-                hoverStyle: {
-                    width: 2
-                }
             }
         },
         series: [{
@@ -657,4 +664,37 @@ function decToMac(d){
             mac += hex.substring(i,i+2)
     }
     return mac;
+}
+
+function toHHMMSS (num) {
+    var sec_num = parseInt(num, 10); // don't forget the second parm
+    //var msec = Math.floor(1000*((sec_num/1000) - Math.floor(sec_num /1000)));
+    //sec_num = Math.floor(sec_num /1000)
+    var hours   = Math.floor(sec_num / 3600);
+    var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+    var seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+    if (hours   < 10) {hours   = "0"+hours;}
+    if (minutes < 10) {minutes = "0"+minutes;}
+    if (seconds < 10) {seconds = "0"+seconds;}
+    //var time    = hours+':'+minutes+':'+seconds+':'+msec;
+    var time    = hours+':'+minutes+':'+seconds;
+    return time;
+}
+
+function tFormat (msec) {
+    var sec_num = parseInt(msec, 10); // don't forget the second parm
+
+    sec_num = Math.floor(sec_num /1000)
+    var hours   = Math.floor(sec_num / 3600);
+    var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+    var seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+    if (hours   < 10) {hours   = "0"+hours;}
+    if (minutes < 10) {minutes = "0"+minutes;}
+    if (seconds < 10) {seconds = "0"+seconds;}
+    //var time    = hours+':'+minutes+':'+seconds+':'+msec;
+    var time    = minutes+' min, '+seconds + " sec";
+    return time;
+
 }
