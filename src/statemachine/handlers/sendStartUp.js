@@ -25,15 +25,19 @@ module.exports = function (device, nextState){
             break;
     }
 
+    var timeNow = new Date();
     if (device.wpiTimes.length > 0) {
         if (device.wpiTimes[device.wpiTimes.length-1].status === "finished") {
-            device.wpiTimes.push({start: new Date(), end: 0, status: "sent", type: "start-up", overload: 0});
+            device.wpiTimes.push({first: timeNow, start: timeNow, end: 0, status: "sent", type: "start-up", overload: 0});
             device.count.sent++;
+        } else {
+            device.wpiTimes[device.wpiTimes.length-1].start = new Date();
         }
     } else {
         device.wpiTimes.push({start: new Date(), end: 0, status: "sent", type: "start-up", overload: 0});
         device.count.sent++;
     }
+
     fsmlog.info("send StartUp: Done!");
     wpilog.info("%s : DLS <-- DEV: StartUp", device.mac);
     wpilog.info(wpiMsg);

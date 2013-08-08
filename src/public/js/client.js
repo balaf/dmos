@@ -209,6 +209,33 @@ connection.onmessage = function (e) {
             App.min(tFormat(simStats.min));
             App.mean(tFormat(simStats.mean));
             App.variance(tFormat(simStats.variance));
+
+
+            //// check individual messages
+            var message = [];
+            for (var key in simStats.devices) {
+                for (var i = 0; i< simStats.devices[key].wpiTimes.length; i++) {
+                    if (!message[i]) {
+                        message[i] = {duration : 0, count:0, warnings:0, min:5000000, max:0}
+                        message[i].type = simStats.devices[key].wpiTimes[i].type;
+                    }
+                    if (simStats.devices[key].wpiTimes[i].status === "finished") {
+                        if (simStats.devices[key].wpiTimes[i].type !== message[i].type) {
+                            message[i].warnings++;
+                        } else {
+                            message[i].duration += simStats.devices[key].wpiTimes[i].duration;
+                            if ( simStats.devices[key].wpiTimes[i].duration < message[i].min) {
+                                message[i].min = simStats.devices[key].wpiTimes[i].duration
+                            }
+                            if ( simStats.devices[key].wpiTimes[i].duration > message[i].max) {
+                                message[i].max = simStats.devices[key].wpiTimes[i].duration
+                            }
+                            message[i].count++;
+                        }
+                    }
+                }
+            }
+            console.log(message);
         }
 
         App.queueChartData.push(tmpQueueChartData);

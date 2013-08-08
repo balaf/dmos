@@ -19,15 +19,19 @@ module.exports = function (device, nextState){
             break;
     }
 
+    var timeNow = new Date();
     if (device.wpiTimes.length > 0) {
         if (device.wpiTimes[device.wpiTimes.length-1].status === "finished") {
-            device.wpiTimes.push({start: new Date(), end: 0, status: "sent", type: "reply-to", overload: 0});
+            device.wpiTimes.push({first: timeNow, start: timeNow, end: 0, status: "sent", type: "reply-to", overload: 0});
             device.count.sent++;
+        } else {
+            device.wpiTimes[device.wpiTimes.length-1].start = new Date();
         }
     } else {
         device.wpiTimes.push({start: new Date(), end: 0, status: "sent", type: "reply-to", overload: 0});
         device.count.sent++;
     }
+
     fsmlog.info("send ReplyTo: Done!");
     wpilog.info("%s : DLS <-- DEV: replyTo", device.mac);
     wpilog.info(wpiMsg);

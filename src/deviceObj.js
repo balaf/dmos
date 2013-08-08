@@ -22,7 +22,7 @@ function deviceObject (mac, e164, be164) {
     this.wpiTimes = [];
     this.overloaded = 0;
     this.pass = "000000";
-    this.count = { sent:0, finished:0, duration:0};
+    this.count = { first: 0, sent:0, finished:0, duration:0};
     this.firmware =  'V3 R1.41.1';
     this.deviceType = 'OpenStage 60';
     this.softwareType = 'Siemens SIP';
