@@ -15,12 +15,12 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-lg-5 col-offset-1">
+                    <div class="col-lg-6">
                         <h5 class="center">Arrivals/Completion:  <span class="rate" data-bind="text: arrivalVsCompletion"></span></h5>
                         <div id="ratesChart" class="chart" data-bind="dxChart: {dataSource: rateChartData, argumentAxis: argAxis, valueAxis: rateValueAxis}"></div>
                         <div class="text">View the request arrival rate Vs the request completion rate</div>
                     </div>
-                    <div class="col-lg-5">
+                    <div class="col-lg-6">
                         <h5 class="center">Queue Size:  <span class="rate" data-bind="text: queue"></span></h5>
                         <div id="queueChart" class="chart" data-bind="dxChart: {dataSource: queueChartData, argumentAxis: argAxis, valueAxis: queueValueAxis}"></div>
                         <div class="text">View the number of requests that have arrived in DLS but are not yet finished</div>
