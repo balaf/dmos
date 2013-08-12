@@ -201,7 +201,7 @@ connection.onmessage = function (e) {
                 tmpCountChartData[i] = { id: i, sent: sent, completed: finished}
                 index++;
             }
-            App.countChartData(tmpCountChartData);
+           // App.countChartData(tmpCountChartData);
             App.histoChartData(tmpHistoChartData);
 
             /// statistics
@@ -236,8 +236,14 @@ connection.onmessage = function (e) {
                 }
             }
             console.log(message);
+            for (var i=0;i<message.length;i++) {
+                message[i].mean = (message[i].duration/message[i].count)/1000;
+                message[i].min /=1000;
+                message[i].max /=1000;
+            }
         }
 
+        App.countChartData(message);
         App.queueChartData.push(tmpQueueChartData);
         App.rateChartData.push(tmpRateChartData);
     }
@@ -453,15 +459,15 @@ function roundTo2Decimals(numberToRound) {
 
 function drawCountChart(){
     $("#countChart").dxChart({
-        dataSource: [{ id: 0, sent: 0, completed: 0}],
-        adjustOnZoom: false,
+        dataSource: [],
+        adjustOnZoom: true,
         animation :{
-            enabled: false
+            enabled: true
         },
         argumentAxis : {
             axisDivisionFactor : 20,
             title : {
-                text : "Devices"
+                text : "Message"
             },
             font : {
                 size: 11
@@ -469,10 +475,10 @@ function drawCountChart(){
         },
         valueAxis : {
             axisDivisionFactor : 20,
-            max: 7,
+            //max: 7,
             min: 0,
             title : {
-                text : "requests sent/finished"
+                text : "Duration (sec)"
             },
             font : {
                 size: 11
@@ -488,19 +494,21 @@ function drawCountChart(){
             border:{
                 visible: true
             },
-            argumentField: 'id',
+            argumentField: 'type',
             point: {
-                size: 1,
+                size: 1
             },
-            type: "steparea",
-            steparea: {
-                border: {
-                    visible: true
-                }
-            }
+            type: "stock"
         },
-        series: [{name: '',valueField: 'sent', color: 'red'},
-                 {name: '', valueField: 'completed', color: 'green'}],
+        series: [
+            {
+                highValueField: "max",
+                lowValueField: "min",
+                closeValueField: "mean",
+                openValueField : 'min',
+                closeValueField : 'max'
+            }
+        ],
         legend: {visible: false}
     });
 }
