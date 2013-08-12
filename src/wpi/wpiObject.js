@@ -228,7 +228,7 @@ function replyToReadAll(device){
         'wap-xcon-type':{'value':'0'},
         'ldap-server-address':{'value':'0.0.0.0'},
         'ldap-server-port':{'value':'389'},
-        'ldap-transport':{'value':'0'},
+        'ldap-transport':{'value':'1'},
         'ldap-authentication':{'value':'0'},
         'user-midlet-download-allowed':{'value':'true'},
         'enable-untrusted-midlets':{'value':'false'},

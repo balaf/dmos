@@ -182,7 +182,7 @@ connection.onmessage = function (e) {
             finished: simStats.finished};
 
         if (simStatus.status === "finished") {
-            var tmpCountChartData = [];
+            //var tmpCountChartData = [];
             var tmpHistoChartData = []
             if (simActualConfig.mac){
                 var index = macToInt(simActualConfig.mac);
@@ -196,9 +196,9 @@ connection.onmessage = function (e) {
                     finished = simStats.devices[decToMac(index)].count.finished;
                     duration = roundTo2Decimals(simStats.devices[decToMac(index)].count.duration/1000);
                 }
-                //tmpCountChartData[i] = { id: i, count: simStats.devices[i].count.sent, completed: simStats.devices[i].count.finished}
+
                 tmpHistoChartData[i] = { id: i, time: duration}
-                tmpCountChartData[i] = { id: i, sent: sent, completed: finished}
+               // tmpCountChartData[i] = { id: i, sent: sent, completed: finished}
                 index++;
             }
            // App.countChartData(tmpCountChartData);
@@ -240,10 +240,11 @@ connection.onmessage = function (e) {
                 message[i].mean = (message[i].duration/message[i].count)/1000;
                 message[i].min /=1000;
                 message[i].max /=1000;
+                message[i].type = message[i].type + '(' + i + ')';
             }
         }
-
-        App.countChartData(message);
+        if (message)
+            App.countChartData(message);
         App.queueChartData.push(tmpQueueChartData);
         App.rateChartData.push(tmpRateChartData);
     }
@@ -421,11 +422,15 @@ $(document).ready(function () {
         App.countChartData.removeAll();
         App.histoChartData.removeAll();
 
-        var tmpQueueChartData = { time: 0, queue : 0};
 
+        var tmpQueueChartData = { time: 0, queue : 0};
+        console.log('6');
         var tmpRateChartData = { time: 0, started: 0, finished: 0};
+
         App.queueChartData.push(tmpQueueChartData);
+
         App.rateChartData.push(tmpRateChartData);
+
 
         simStats = {};
 
@@ -476,7 +481,7 @@ function drawCountChart(){
         valueAxis : {
             axisDivisionFactor : 20,
             //max: 7,
-            min: 0,
+            //min: 0,
             title : {
                 text : "Duration (sec)"
             },
@@ -504,9 +509,8 @@ function drawCountChart(){
             {
                 highValueField: "max",
                 lowValueField: "min",
-                closeValueField: "mean",
-                openValueField : 'min',
-                closeValueField : 'max'
+                openValueField : 'mean',
+                closeValueField : 'mean'
             }
         ],
         legend: {visible: false}
