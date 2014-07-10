@@ -30,11 +30,11 @@ ko.protectedObservable = function(initialValue) {
 };
 
 var simConfig = {
-    serverAddress : "10.5.62.10",
+    serverAddress : "localhost",
     mac : "03:00:00:00:00:00",
     be164 : 3021080000,
     e164 : 4021080000,
-    action: 'logon',
+    action: 'start',
     users: 100,
     targetRate: 1, //(users/sec)
     pass: '000000',

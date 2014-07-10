@@ -6,7 +6,9 @@ var fs = require('fs');
 
 var simulator = require(__dirname + '/../simulator');
 
-
+var  key = fs.readFileSync( __dirname + '/../../cert/key.pem'),
+ cert = fs.readFileSync( __dirname + '/../../cert/cert.pem'),
+ ca =fs.readFileSync( __dirname + '/../../cert/cert.pem');
 
 function sendRequest(msg,obj,callback) {
     var simConfig = simulator.getSimConfig();
@@ -22,9 +24,9 @@ function sendRequest(msg,obj,callback) {
             'Content-Length': Buffer.byteLength(msg),
             'Cookie' : obj.cookie
         } ,
-        key: fs.readFileSync( __dirname + '/../../cert/key.pem'),
-        cert: fs.readFileSync( __dirname + '/../../cert/cert.pem'),
-        ca: fs.readFileSync( __dirname + '/../../cert/cert.pem'),
+        key: key,
+        cert: cert,
+        ca: ca,
         rejectUnauthorized: false
     };
     out.info("Header:", options.headers)
